@@ -1,12 +1,15 @@
-/**
- * @file Pulley.cpp
- *
- * @author Aditya Menon
- */
-
 #include "pch.h"
 #include "Pulley.h"
 #include "Machine.h"
+
+/**
+ * Set the image for this pulley
+ * @param filename Filename for the image
+ */
+void Pulley::SetImage(std::wstring filename)
+{
+    mPolygon.SetImage(filename);
+}
 
 /**
  * Constructor
@@ -15,13 +18,11 @@
  */
 Pulley::Pulley(Machine* machine, double radius) : Component(machine)
 {
+    // Set the radius
     mRadius = radius;
     
-    // Create the pulley with a circle shape
+    // Create a circular polygon for the pulley
     mPolygon.Circle(radius);
-    
-    // Set the pulley image
-    mPolygon.SetImage(L"images/pulley2.png");
 }
 
 /**
@@ -30,8 +31,20 @@ Pulley::Pulley(Machine* machine, double radius) : Component(machine)
  */
 void Pulley::ConnectPulley(std::shared_ptr<Pulley> pulley)
 {
-    // Add to our list of connected pulleys
+    // Add the pulley to our connected pulleys list
     mConnectedPulleys.push_back(pulley);
+}
+
+/**
+ * Draw this pulley
+ * @param graphics Graphics context to draw on
+ */
+void Pulley::Draw(std::shared_ptr<wxGraphicsContext> graphics)
+{
+    // Draw the base pulley shape
+    Component::Draw(graphics);
+    
+    // We could also draw connections to other pulleys here
 }
 
 /**
@@ -42,12 +55,14 @@ void Pulley::ConnectPulley(std::shared_ptr<Pulley> pulley)
  */
 bool Pulley::HitTest(double x, double y)
 {
-    // Calculate distance from center of pulley
-    double dx = x - mPosition.m_x;
-    double dy = y - mPosition.m_y;
-    double distance = sqrt(dx * dx + dy * dy);
+    // Convert the point to relative coordinates
+    double relX = x - GetPosition().m_x;
+    double relY = y - GetPosition().m_y;
     
-    // If distance is less than radius, the point is inside the pulley
+    // Calculate the distance from center
+    double distance = sqrt(relX * relX + relY * relY);
+    
+    // Check if the point is within the radius
     return distance <= mRadius;
 }
 
@@ -57,18 +72,9 @@ bool Pulley::HitTest(double x, double y)
  */
 void Pulley::SetTime(double time)
 {
-    // Nothing to do for now - rotation is handled by the Motor class
-}
-
-/**
- * Draw this pulley
- * @param graphics Graphics context to draw on
- */
-void Pulley::Draw(std::shared_ptr<wxGraphicsContext> graphics)
-{
-    // Draw the pulley
-    Component::Draw(graphics);
+    // Component::SetTime takes care of setting the time
+    Component::SetTime(time);
     
-    // Draw the belts between this pulley and connected pulleys
-    // This would be implemented in a more complete version
-} 
+    // The motor in Motor.cpp will handle setting rotation directly,
+    // so we don't need to do anything special here
+}

@@ -46,6 +46,12 @@ public:
     void operator=(const Pulley &) = delete;
 
     /**
+     * Set the image for this pulley
+     * @param filename Filename for the image
+     */
+    void SetImage(std::wstring filename);
+
+    /**
      * Get the radius of the pulley
      * @return Radius in pixels
      */
