@@ -1,106 +1,170 @@
 /**
  * @file Component.h
+ * @author Adi M
  *
- * @author Aditya Menon
- *
- * Base class for machine components
+ * Base class for components
  */
+ 
+#ifndef COMPONENT_H
+#define COMPONENT_H
 
-#ifndef CANADIANEXPERIENCE_COMPONENT_H
-#define CANADIANEXPERIENCE_COMPONENT_H
-
-#include "Polygon.h"
 #include <memory>
-#include <vector>
+#include <string>
 
-// Forward declaration
+// Forward references
 class Machine;
+namespace cse335 {
+    class Polygon;
+}
 
 /**
- * Base class for machine components
+ * Base class for components of a machine
  */
-class Component
-{
-protected:
-    /// The machine this component is part of
-    Machine* mMachine = nullptr;
-
-    /// The position of this component
-    wxPoint2DDouble mPosition = wxPoint2DDouble(0, 0);
-
-    /// The rotation of this component in turns (0-1)
+class Component {
+private:
+    /// The position of this component relative to the parent component
+    wxPoint mPosition = wxPoint(0, 0);
+    
+    /// The component name
+    std::string mName;
+    
+    /// The rotation in radians
     double mRotation = 0;
-
-    /// The polygon used to draw this component
-    cse335::Polygon mPolygon;
+    
+    /// The polygon that makes up the component base
+    std::shared_ptr<cse335::Polygon> mBase;
+    
+    /// Current rotation of the component
+    double mCurrentRotation = 0;
+    
+    /// Center for the component relative to position
+    wxPoint mCenter = wxPoint(0, 0);
+    
+    /// The machine this component is associated with
+    Machine* mMachine = nullptr;
+    
+    /// Phase offset for rotation
+    double mPhase = 0;
 
 public:
-    /// Default constructor (disabled)
-    Component() = delete;
-
+    Component();
+    virtual ~Component();
+    
     /**
-     * Constructor
-     * @param machine The machine this component is part of
+     * Set the machine this component is associated with
+     * @param machine Machine pointer
      */
-    Component(Machine* machine);
-
-    /// Destructor
-    virtual ~Component() = default;
-
-    /// Copy constructor (disabled)
-    Component(const Component &) = delete;
-
-    /// Assignment operator (disabled)
-    void operator=(const Component &) = delete;
-
+    void SetMachine(Machine* machine);
+    
+    /**
+     * Draw the component
+     * @param graphics Graphics context to draw on
+     * @param position Position to draw at
+     */
+    virtual void Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position);
+    
+    /**
+     * Get the current rotation
+     * @return Rotation in radians
+     */
+    double GetRotation();
+    
+    /**
+     * Get the base polygon
+     * @return Polygon that makes up the base
+     */
+    std::shared_ptr<cse335::Polygon> GetBase();
+    
+    /**
+     * Set the time for the component
+     * @param time Time in seconds
+     */
+    virtual void SetTime(double time);
+    
+    /**
+     * Set the current rotation of the component
+     * @param rotation Rotation in radians
+     */
+    void SetCurrentRotation(double rotation);
+    
+    /**
+     * Get the machine this component is associated with
+     * @return Machine pointer
+     */
+    Machine* GetMachine();
+    
+    /**
+     * Test if a point is within this component
+     * @param pos Position to test
+     * @return true if hit
+     */
+    virtual bool HitTest(wxPoint pos);
+    
     /**
      * Set the position of this component
-     * @param x X position
-     * @param y Y position
+     * @param x X position in pixels
+     * @param y Y position in pixels
      */
-    virtual void SetPosition(double x, double y);
-
+    void SetPosition(int x, int y);
+    
     /**
-     * Get the X coordinate of the component
-     * @return X coordinate in pixels
+     * Set the position of this component
+     * @param position Position in pixels
      */
-    double GetX() const { return mPosition.m_x; }
-
+    void SetPosition(wxPoint position);
+    
     /**
-     * Get the Y coordinate of the component
-     * @return Y coordinate in pixels
+     * Get the position of this component
+     * @return Position in pixels
      */
-    double GetY() const { return mPosition.m_y; }
-
+    wxPoint GetPosition() const { return mPosition; }
+    
     /**
-     * Get the position of the component
-     * @return Position in pixels as a point
+     * Draw a rectangle for this component
+     * @param x Left edge
+     * @param y Top edge
+     * @param width Width of rectangle
+     * @param height Height of rectangle
      */
-    wxPoint2DDouble GetPosition() const { return mPosition; }
-
+    void Rectangle(int x, int y, int width, int height);
+    
     /**
-     * Draw this component
-     * @param graphics Graphics context to draw on
+     * Set an image for this component
+     * @param filename Image filename
      */
-    virtual void Draw(std::shared_ptr<wxGraphicsContext> graphics);
-
+    void SetImage(const std::wstring& filename);
+    
     /**
-     * Set the rotation of this component
-     * @param rotation Rotation in turns (0-1 is one complete rotation)
+     * Set the phase offset for rotation
+     * @param phase Phase offset (0-1)
      */
-    virtual void SetRotation(double rotation);
-
+    void SetPhase(double phase);
+    
     /**
-     * Get the rotation of this component
-     * @return Rotation in turns (0-1 is one complete rotation)
+     * Get the phase offset
+     * @return Phase offset
      */
-    double GetRotation() const { return mRotation; }
-
+    double GetPhase() const { return mPhase; }
+    
     /**
-     * Update the component for the current time
-     * @param time Current machine time in seconds
+     * Place the component relative to an offset
+     * @param offset Offset position
      */
-    virtual void SetTime(double time) {}
+    void Place(wxPoint offset);
+    
+    /**
+     * Get the center point of the component
+     * @return Center point
+     */
+    wxPoint Center() const { return mCenter; }
+    
+    /**
+     * Helper function to set an image with proper path checking
+     * @param imagePath Path to the image
+     * @param defaultColor Default color to use if image not found
+     * @return True if image was set successfully
+     */
+    bool SetComponentImage(const std::wstring& imagePath, wxColour defaultColor = *wxWHITE);
 };
 
-#endif //CANADIANEXPERIENCE_COMPONENT_H 
+#endif //COMPONENT_H

@@ -1,118 +1,92 @@
 /**
  * @file Machine.h
+ * @author Adi M
  *
- * @author Aditya Menon
- *
- * Class that represents a machine
+ * Class for the machine
  */
+ 
+#ifndef MACHINE_H
+#define MACHINE_H
 
-#ifndef CANADIANEXPERIENCE_MACHINE_H
-#define CANADIANEXPERIENCE_MACHINE_H
-
-#include <vector>
 #include <memory>
-#include "Component.h"
-#include "Motor.h"
+#include <vector>
+
+// Forward references
+class Component;
+class MachineSystem;
 
 /**
- * Class that represents a machine
+ * Class for the machine
  */
-class Machine
-{
+class Machine {
 private:
-    /// The location of the machine
-    wxPoint mLocation = wxPoint(0, 0);
-
+    /// Machine number
+    int mMachineNum = 0;
+    
+    /// Flag value
+    int mFlag = 0;
+    
     /// The components that make up the machine
     std::vector<std::shared_ptr<Component>> mComponents;
 
-    /// The machine's motors
-    std::vector<std::shared_ptr<Motor>> mMotors;
-
-    /// The current frame
-    int mFrame = 0;
-
-    /// The frame rate in frames per second
-    double mFrameRate = 30.0;
-
-    /// The machine number
-    int mMachineNumber = 1;
-
-    /// The flag value from the control panel
-    int mFlag = 0;
-
 public:
-    /// Constructor
     Machine();
-
-    /// Destructor
-    virtual ~Machine() = default;
-
-    /// Copy constructor (disabled)
-    Machine(const Machine &) = delete;
-
-    /// Assignment operator (disabled)
-    void operator=(const Machine &) = delete;
-
+    
     /**
-     * Set the machine location
-     * @param location Location to set
+     * Constructor with a machine number parameter
+     * @param machineNum The machine number
      */
-    void SetLocation(wxPoint location) { mLocation = location; }
+    Machine(int machineNum);
 
     /**
-     * Get the machine location
-     * @return Location of the machine
-     */
-    wxPoint GetLocation() const { return mLocation; }
-
-    /**
-     * Draw the machine at the current location
+     * Draw the machine
      * @param graphics Graphics context to draw on
+     * @param position Position to draw at
      */
-    void DrawMachine(std::shared_ptr<wxGraphicsContext> graphics);
-
-    /**
-     * Set the machine animation frame
-     * @param frame Frame number
-     */
-    void SetMachineFrame(int frame);
-
-    /**
-     * Set the expected frame rate
-     * @param rate Frame rate in frames per second
-     */
-    void SetFrameRate(double rate) { mFrameRate = rate; }
-
-    /**
-     * Choose a machine to build
-     * @param machine Machine number
-     */
-    void ChooseMachine(int machine);
-
-    /**
-     * Get the current machine number
-     * @return Machine number
-     */
-    int GetMachineNumber() const { return mMachineNumber; }
-
-    /**
-     * Get the current machine time
-     * @return Machine time in seconds
-     */
-    double GetMachineTime() const;
-
-    /**
-     * Set the flag from the control panel
-     * @param flag Flag to set
-     */
-    void SetFlag(int flag);
-
+    void Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position);
+    
     /**
      * Add a component to the machine
      * @param component Component to add
      */
     void AddComponent(std::shared_ptr<Component> component);
+    
+    /**
+     * Get a pointer to the machine system
+     * @return Pointer to IMachineSystem object
+     */
+    MachineSystem* GetSystem();
+    
+    /**
+     * Test if a point is within the machine
+     * @param pos Position to test
+     * @return true if hit
+     */
+    bool HitTest(wxPoint pos);
+    
+    /**
+     * Set the machine number
+     * @param num Machine number to set
+     */
+    void SetMachineNum(int num);
+    
+    /**
+     * Set the flag value
+     * @param flag Flag value to set
+     */
+    void SetFlag(int flag);
+    
+    /**
+     * Get the current machine number
+     * @return Machine number
+     */
+    int GetMachineNum();
+    
+    /**
+     * Set the machine time
+     * @param time Machine time in seconds
+     */
+    void SetTime(double time);
 };
 
-#endif //CANADIANEXPERIENCE_MACHINE_H 
+#endif //MACHINE_H

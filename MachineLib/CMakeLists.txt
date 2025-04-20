@@ -5,29 +5,24 @@ set(SOURCE_FILES
         pch.h
         IMachineSystem.h
         MachineSystemFactory.cpp MachineSystemFactory.h
-        MachineDialog.cpp MachineDialog.h include/machine-api.h
-        Const.cpp
-        Const.h
-        MachineSystemStandin.h
-        MachineSystemStandin.cpp
-        MachineStandin.cpp
-        MachineStandin.h
-        Polygon.cpp
-        Polygon.h
-        Component.cpp Component.h
-        Shape.cpp Shape.h
-        Motor.cpp Motor.h
-        Pulley.cpp Pulley.h
-        Source.cpp Source.h
-        Sink.cpp Sink.h
+        MachineDialog.cpp MachineDialog.h
+        MachineSystemStandin.h MachineSystemStandin.cpp
+        MachineStandin.cpp MachineStandin.h
+        Polygon.cpp Polygon.h
         Machine.cpp Machine.h
         MachineSystem.cpp MachineSystem.h
+        Component.cpp Component.h
+        Motor.cpp Motor.h
+        Pulley.cpp Pulley.h
+        Shape.cpp Shape.h
+        Source.cpp Source.h
+        Sink.cpp Sink.h
         MachineFactory1.cpp MachineFactory1.h
         MachineFactory2.cpp MachineFactory2.h
+        Const.cpp Const.h
 )
 
-# Removed:
-# Motor.cpp Motor.h Pulley.cpp Pulley.h
+
 
 find_package(wxWidgets COMPONENTS core base xrc html xml REQUIRED)
 include(${wxWidgets_USE_FILE})

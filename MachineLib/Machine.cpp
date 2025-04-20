@@ -1,108 +1,37 @@
 /**
  * @file Machine.cpp
- *
- * @author Aditya Menon
+ * @author Adi M
  */
-
+ 
 #include "pch.h"
 #include "Machine.h"
-#include "Motor.h"
 #include "Component.h"
-
 
 /**
  * Constructor
  */
 Machine::Machine()
 {
-    // Initialize with a default frame rate of 30 frames per second
-    // This means one complete rotation will take exactly 1 second
-    // at speed = 1.0
-    mFrameRate = 30.0;
 }
 
 /**
- * Draw the machine at the current location
+ * Constructor with machine number
+ * @param machineNum Machine number
+ */
+Machine::Machine(int machineNum) : mMachineNum(machineNum)
+{
+}
+
+/**
+ * Draw the machine
  * @param graphics Graphics context to draw on
+ * @param position Position to draw at
  */
-void Machine::DrawMachine(std::shared_ptr<wxGraphicsContext> graphics)
+void Machine::Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position)
 {
-    graphics->PushState();
-    
-    graphics->Translate(mLocation.x, mLocation.y);
-    
-    // Draw all machine components
-    for (auto component : mComponents)
+    for(auto component : mComponents)
     {
-        component->Draw(graphics);
-    }
-    
-    graphics->PopState();
-}
-
-/**
- * Set the machine animation frame
- * @param frame Frame number
- */
-void Machine::SetMachineFrame(int frame)
-{
-    mFrame = frame;
-    
-    // Calculate the time based on the frame rate
-    // This converts frame numbers to seconds
-    // Example: At 30fps, frame 30 = 1 second, frame 60 = 2 seconds
-    double time = (double)frame / mFrameRate;
-    
-    // Update all components with the current time
-    for (auto component : mComponents)
-    {
-        component->SetTime(time);
-    }
-}
-
-/**
- * Choose which machine to create
- * @param machine Machine number
- */
-void Machine::ChooseMachine(int machine)
-{
-    // Just set the machine number
-    mMachineNumber = machine;
-}
-
-/**
- * Get the current machine time
- * @return Machine time in seconds
- */
-double Machine::GetMachineTime() const
-{
-    return (double)mFrame / mFrameRate;
-}
-
-/**
- * Set the flag from the control panel
- * @param flag Flag to set
- */
-void Machine::SetFlag(int flag)
-{
-    mFlag = flag;
-    
-    // Handle flag state changes
-    if (mFlag == 1)
-    {
-        // Start machines at their designated times
-        for (auto motor : mMotors)
-        {
-            motor->SetRunning(true);
-        }
-    }
-    else if (mFlag == 0)
-    {
-        // Stop all machines
-        for (auto motor : mMotors)
-        {
-            motor->SetRunning(false);
-        }
+        component->Draw(graphics, position);
     }
 }
 
@@ -113,4 +42,71 @@ void Machine::SetFlag(int flag)
 void Machine::AddComponent(std::shared_ptr<Component> component)
 {
     mComponents.push_back(component);
-} 
+    component->SetMachine(this);
+}
+
+/**
+ * Get a pointer to the machine system
+ * @return Pointer to IMachineSystem object
+ */
+MachineSystem* Machine::GetSystem()
+{
+    return nullptr;
+}
+
+/**
+ * Test if a point is within the machine
+ * @param pos Position to test
+ * @return true if hit
+ */
+bool Machine::HitTest(wxPoint pos)
+{
+    for(auto component : mComponents)
+    {
+        if(component->HitTest(pos))
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Set the machine number
+ * @param num Machine number to set
+ */
+void Machine::SetMachineNum(int num)
+{
+    mMachineNum = num;
+}
+
+/**
+ * Set the flag value
+ * @param flag Flag value to set
+ */
+void Machine::SetFlag(int flag)
+{
+    mFlag = flag;
+}
+
+/**
+ * Get the current machine number
+ * @return Machine number
+ */
+int Machine::GetMachineNum()
+{
+    return mMachineNum;
+}
+
+/**
+ * Set the machine time
+ * @param time Machine time in seconds
+ */
+void Machine::SetTime(double time)
+{
+    for(auto component : mComponents)
+    {
+        component->SetTime(time);
+    }
+}

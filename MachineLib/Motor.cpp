@@ -1,98 +1,110 @@
 /**
  * @file Motor.cpp
- *
- * @author Aditya Menon
+ * @author Adi M
  */
-
+ 
 #include "pch.h"
 #include "Motor.h"
-#include "Machine.h"
-#include "Pulley.h"
+#include "Polygon.h"
+
+using namespace std;
+
+/// Size of the shaft
+const int ShaftRadius = 15;
 
 /**
  * Constructor
- * @param machine The machine this motor is part of
  */
-Motor::Motor(Machine* machine) : Component(machine)
+Motor::Motor()
 {
-    // Create a blank polygon for the main component
-    mPolygon.Rectangle(0, 0, 1, 1);
-    mPolygon.SetColor(wxColour(0, 0, 0, 0)); // Transparent
+    // Create the motor body
+    auto base = GetBase();
+    base->CenteredSquare(Size);
+    base->SetColor(*wxBLUE);
     
-
-    std::wstring imagesDir = L"images";
-    
-    // Create the motor body using motor3.png (stationary)
-    mMotor.SetImage(imagesDir + L"/motor3.png");
-    
-    // Create a rectangle shape for the motor body - 80x80 square
-    mMotor.Rectangle(-60, 10, 80, 80);
-
-    // Create the pulley that will rotate inside the motor
-    mShaft.SetImage(imagesDir + L"/pulley2.png");
-
-    // Create a circle for the pulley - 30 pixels diameter
-    mShaft.Circle(15);
-
-    // Set rotation speed to exactly 1 rotation per second as specified
-    mSpeed = 1.0;
+    // No shaft visualization - using pulley instead
 }
 
 /**
- * Set the position of this motor
- * @param x X position
- * @param y Y position
+ * Constructor with images directory
+ * @param imagesDir Directory containing images
  */
-void Motor::SetPosition(double x, double y)
+Motor::Motor(std::wstring imagesDir)
 {
-    Component::SetPosition(x, y);
+    // Create the motor body
+    auto base = GetBase();
+    base->Rectangle(-Size/2, -Size/2, Size, Size);
+    base->SetImage(imagesDir + L"/motor3.png");
+    
+    // No shaft visualization - using pulley instead
 }
 
 /**
- * Draw this motor
+ * Set the motor speed
+ * @param speed Speed in rotations per second
+ */
+void Motor::SetSpeed(double speed)
+{
+    mSpeed = speed;
+}
+
+/**
+ * Get the motor speed
+ * @return Speed in rotations per second
+ */
+double Motor::GetSpeed()
+{
+    return mSpeed;
+}
+
+/**
+ * Draw the motor
  * @param graphics Graphics context to draw on
+ * @param position Position to draw at
  */
-void Motor::Draw(std::shared_ptr<wxGraphicsContext> graphics)
+void Motor::Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position)
 {
-    // Draw the motor body (motor3.png) - stationary
-    mMotor.DrawPolygon(graphics, mPosition.m_x, mPosition.m_y - 50);
-
-    // Draw the rotating pulley in the middle of the motor
-    mShaft.DrawPolygon(graphics, mPosition.m_x - 20, mPosition.m_y - 78);
+    // Only draw the base - no shaft
+    Component::Draw(graphics, position);
 }
 
 /**
- * Add a component to be driven by this motor
- * @param component Component to drive
+ * Set the time for this component
+ * @param time Current time in seconds
  */
-void Motor::AddComponent(std::shared_ptr<Component> component)
+void Motor::SetTime(double time)
 {
-    // Add to the list of driven components
-    mDriven.push_back(component);
+    Component::SetTime(time);
+    
+    // Compute rotation based on time and speed
+    // 1 rotation per second times speed
+    double rotation = time * mSpeed;
+    
+    // Calculate rotation in radians - exactly one rotation per second
+    double rotationRadians = rotation * 2 * M_PI;
+    
+    // Update all components driven by this motor
+    for (auto component : mDrivenComponents)
+    {
+        if (component != nullptr)
+        {
+            // Set the current rotation for the driven component
+            component->SetCurrentRotation(rotationRadians);
+        }
+    }
 }
 
 /**
- * Test whether a point hits this object
+ * Hit test for the motor
  * @param pos Position to test
- * @return true if a hit, false otherwise
+ * @return true if position is in motor
  */
 bool Motor::HitTest(wxPoint pos)
 {
-    // Convert the point to relative coordinates
-    double x = pos.x - mPosition.m_x;
-    double y = pos.y - mPosition.m_y;
-    
-    // Check if it's inside the pulley (shaft) which is a circle
-    double shaftX = x;
-    double shaftY = y - 78;
-    double shaftDistance = sqrt(shaftX * shaftX + shaftY * shaftY);
-    if (shaftDistance <= 15)  // 15 is the radius of the shaft circle
-    {
-        return true;
-    }
-    
-    // Check if it's inside the motor body (rectangle)
-    if (x >= -40 && x <= 40 && y - 50 >= -40 && y - 50 <= 40)
+    // Simple hit test - check if within motor size
+    double halfSize = Size / 2.0;
+    if(pos.x >= -halfSize && pos.x <= halfSize &&
+       pos.y >= -halfSize && pos.y <= halfSize)
     {
         return true;
     }
@@ -101,43 +113,24 @@ bool Motor::HitTest(wxPoint pos)
 }
 
 /**
- * Set the current time
- * @param time Current time in seconds
+ * Add a sink that will be driven by this motor
+ * @param sink Pointer to sink component
  */
-void Motor::SetTime(double time)
+void Motor::AddSink(Component* sink)
 {
-    // Only calculate rotation when the motor is running
-    if (mRunning)
+    if (sink != nullptr)
     {
-        // Calculate rotation based on time and speed
-        // For exactly 1 rotation per second, we only need the fractional part
-        // of the time, multiplied by 2π for a full circle
-        double rotationInTurns = fmod(time * mSpeed, 1.0);
-        
-        // Set the component rotation (0-1 range)
-        mRotation = rotationInTurns;
-        
-        // Set the shaft rotation in radians (0-2π range)
-        // 2π radians = 1 full turn (360 degrees)
-        mShaft.SetRotation(rotationInTurns * 2 * M_PI);
-        
-        // Update all driven components with appropriate rotation
-        for (auto component : mDriven)
-        {
-            // Check if it's a pulley
-            auto pulley = std::dynamic_pointer_cast<Pulley>(component);
-            if (pulley != nullptr)
-            {
-                // For pulleys, we set rotation directly based on the motor's rotation
-                // This simulates the motor shaft (source pulley) driving the connected pulleys
-                pulley->SetRotation(rotationInTurns);
-            }
-            else
-            {
-                // For other components, just pass the rotation
-                component->SetRotation(rotationInTurns);
-            }
-        }
+        // Add this sink to our driven components
+        mDrivenComponents.push_back(sink);
     }
-} 
+}
 
+/**
+ * Get the source component for this motor
+ * @return Pointer to the source
+ */
+std::shared_ptr<Component> Motor::GetSource()
+{
+    // For now just return nullptr
+    return nullptr;
+}

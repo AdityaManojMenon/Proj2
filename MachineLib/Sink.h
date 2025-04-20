@@ -1,101 +1,71 @@
 /**
  * @file Sink.h
+ * @author Your Name
  *
- * @author Aditya Menon
- *
- * Class representing a sink component of a machine that receives rotation
+ * Class for a sink component
  */
+ 
+#ifndef SINK_H
+#define SINK_H
 
-#ifndef CANADIANEXPERIENCE_SINK_H
-#define CANADIANEXPERIENCE_SINK_H
-
-#include "Component.h"
 #include <memory>
 
-// Forward declarations
-class Machine;
+// Forward references
 class Source;
-class Pulley;
-class Shape;
+class Component;
 
 /**
- * Class representing a sink component of a machine that receives rotation
+ * Class for a sink component
  */
-class Sink : public Component
-{
+class Sink {
 private:
-    /// The source that drives this sink (association)
-    std::shared_ptr<Source> mSource;
+    /// The source that drives this sink
+    Source* mSource = nullptr;
     
-    /// The component this sink is attached to (association)
-    std::shared_ptr<Component> mComponent;
+    /// Current rotation in radians
+    double mRotation = 0;
     
-    /// The pulley this sink is connected to (composition)
-    std::shared_ptr<Pulley> mPulley;
-    
-    /// The shape this sink is connected to (composition)
-    std::shared_ptr<Shape> mShape;
-    
-    /// The current rotation
-    double mRotation = 0.0;
+    /// The component this sink is associated with
+    Component* mComponent = nullptr;
 
 public:
+    Sink() {}
+    
     /**
-     * Constructor
-     * @param machine The machine this sink is part of
+     * Set the source that drives this sink
+     * @param source Source pointer
      */
-    Sink(Machine* machine);
-
-    /** Default constructor (disabled) */
-    Sink() = delete;
-
-    /** Copy constructor (disabled) */
-    Sink(const Sink &) = delete;
-
-    /** Assignment operator (disabled) */
-    void operator=(const Sink &) = delete;
-
+    void SetSource(Source* source) { mSource = source; }
+    
     /**
-     * Set the source for this sink
-     * @param source Source to set
+     * Get the source that drives this sink
+     * @return Source pointer
      */
-    void SetSource(std::shared_ptr<Source> source);
+    Source* GetSource() const { return mSource; }
     
     /**
      * Set the rotation for this sink
-     * @param rotation Rotation value (0-1)
+     * @param rotation Rotation in radians
      */
-    void SetRotation(double rotation) override;
+    void SetRotation(double rotation) { mRotation = rotation; }
     
     /**
-     * Set the component this sink is attached to
-     * @param component Component to set
+     * Get the current rotation
+     * @return Rotation in radians
      */
-    void SetComponent(std::shared_ptr<Component> component);
+    double GetRotation() const { return mRotation; }
     
     /**
-     * Set the pulley this sink is connected to
-     * @param pulley Pulley to set
+     * Set the component this sink is associated with
+     * @param component Component pointer
      */
-    void SetPulley(std::shared_ptr<Pulley> pulley);
+    void SetComponent(Component* component) { mComponent = component; }
     
     /**
-     * Set the shape this sink is connected to
-     * @param shape Shape to set
+     * Get the component this sink is associated with
+     * @return Component pointer
      */
-    void SetShape(std::shared_ptr<Shape> shape);
-    
-    /**
-     * Update for the current time
-     * @param time Current time in seconds
-     */
-    virtual void SetTime(double time) override;
-    
-    /**
-     * Draw this sink
-     * @param graphics Graphics context to draw on
-     */
-    virtual void Draw(std::shared_ptr<wxGraphicsContext> graphics) override;
+    Component* GetComponent() const { return mComponent; }
 };
 
-#endif //CANADIANEXPERIENCE_SINK_H 
+#endif //SINK_H 

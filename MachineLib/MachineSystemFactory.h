@@ -1,39 +1,34 @@
 /**
  * @file MachineSystemFactory.h
  *
- * @author Aditya Menon
+ * @author Anik Momtaz
+ * @author Charles Owen
  *
- * Factory class that creates the machine system
+ * IMachineSystem factory class. Creates IMachineSystem objects
+ *
+ * You should not have any reason to change this header file!
  */
 
 #ifndef CANADIANEXPERIENCE_MACHINESYSTEMFACTORY_H
 #define CANADIANEXPERIENCE_MACHINESYSTEMFACTORY_H
 
 #include <memory>
-#include <string>
 
 class IMachineSystem;
 
 /**
- * Factory class that creates the machine system
+ * IMachineSystem factory class. Creates IMachineSystem objects
  */
 class MachineSystemFactory
 {
 private:
-    /// Directory containing resource files
+    /// The resources directory
     std::wstring mResourcesDir;
 
 public:
-    /**
-     * Constructor
-     * @param resourcesDir Directory containing resource files
-     */
-    MachineSystemFactory(std::wstring resourcesDir) : mResourcesDir(resourcesDir) {}
+    MachineSystemFactory(std::wstring resourcesDir);
 
-    /**
-     * Create a machine system
-     * @return The created machine system
-     */
+    // Do not change the return type for CreateMachineSystem!
     std::shared_ptr<IMachineSystem> CreateMachineSystem();
 };
 

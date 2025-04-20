@@ -1,21 +1,44 @@
 /**
  * @file MachineSystem.cpp
- *
- * @author Aditya Menon
+ * @author Adi M
  */
 
 #include "pch.h"
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 #include "MachineSystem.h"
 #include "Machine.h"
+#include "MachineFactory1.h"
+#include "MachineFactory2.h"
+
+/// The images directory
+const std::wstring ImagesDirectory = L"/images";
 
 /**
  * Constructor
- * @param resourcesDir Path to the resources directory
+ * @param resourcesDir Directory for resources
  */
-MachineSystem::MachineSystem(std::wstring resourcesDir) : mResourcesDir(resourcesDir)
+MachineSystem::MachineSystem(const std::wstring& resourcesDir)
 {
-    // Create an empty machine - will be replaced in ChooseMachine
-    mMachine = std::make_shared<Machine>();
+    mResourcesDir = resourcesDir;
+    
+    // If resource directory isn't provided, use executable path
+    if (mResourcesDir.empty())
+    {
+        // Get directory the executable is in
+        auto exePath = wxStandardPaths::Get().GetExecutablePath();
+        mResourcesDir = wxFileName(exePath).GetPath().ToStdWstring();
+    }
+    
+    // Set up the images directory
+    imageDir = mResourcesDir + ImagesDirectory;
+    
+    // Create machine factories
+    mFactory1 = std::make_shared<MachineFactory1>(mResourcesDir);
+    mFactory2 = std::make_shared<MachineFactory2>(mResourcesDir);
+    
+    // Create initial machine (machine #1)
+    ChooseMachine(1);
 }
 
 /**
@@ -24,7 +47,7 @@ MachineSystem::MachineSystem(std::wstring resourcesDir) : mResourcesDir(resource
  */
 void MachineSystem::SetLocation(wxPoint location)
 {
-    mMachine->SetLocation(location);
+    mPosition = location;
 }
 
 /**
@@ -33,7 +56,7 @@ void MachineSystem::SetLocation(wxPoint location)
  */
 wxPoint MachineSystem::GetLocation()
 {
-    return mMachine->GetLocation();
+    return mPosition;
 }
 
 /**
@@ -42,7 +65,11 @@ wxPoint MachineSystem::GetLocation()
  */
 void MachineSystem::DrawMachine(std::shared_ptr<wxGraphicsContext> graphics)
 {
-    mMachine->DrawMachine(graphics);
+    // Just forward to the machine's Draw function
+    if (mMachine != nullptr)
+    {
+        mMachine->Draw(graphics, mPosition);
+    }
 }
 
 /**
@@ -51,7 +78,31 @@ void MachineSystem::DrawMachine(std::shared_ptr<wxGraphicsContext> graphics)
  */
 void MachineSystem::SetMachineFrame(int frame)
 {
-    mMachine->SetMachineFrame(frame);
+    mFrame = frame;
+    
+    // Compute time in seconds based on frame rate
+    if (mFrameRate > 0)
+    {
+        mTime = double(frame) / mFrameRate;
+    }
+    
+    // Check if the machine should be running based on start/end times
+    mIsRunning = (mTime >= mStartTime) && (mEndTime == 0 || mTime <= mEndTime);
+    
+    if (mMachine != nullptr)
+    {
+        if (mIsRunning)
+        {
+            // If running, update with the time since start
+            double runningTime = mTime - mStartTime;
+            mMachine->SetTime(runningTime);
+        }
+        else
+        {
+            // If not running, set to time 0 (stopped state)
+            mMachine->SetTime(0);
+        }
+    }
 }
 
 /**
@@ -60,7 +111,7 @@ void MachineSystem::SetMachineFrame(int frame)
  */
 void MachineSystem::SetFrameRate(double rate)
 {
-    mMachine->SetFrameRate(rate);
+    mFrameRate = rate;
 }
 
 /**
@@ -69,26 +120,44 @@ void MachineSystem::SetFrameRate(double rate)
  */
 void MachineSystem::ChooseMachine(int machine)
 {
-    // Access the globally declared machines from MachineSystemFactory.cpp
-    extern std::shared_ptr<Machine> gMachine1;
-    extern std::shared_ptr<Machine> gMachine2;
+    mMachineNum = machine;
     
-    if (machine == 1 && gMachine1 != nullptr)
+    // Create a machine based on the machine number
+    switch(machine)
     {
-        mMachine = gMachine1;
-        // Make sure the machine number is set correctly
-        mMachine->ChooseMachine(1);
+        case 1:
+            if (mFactory1 != nullptr)
+            {
+                mMachine = mFactory1->Create();
+            }
+            break;
+            
+        case 2:
+            if (mFactory2 != nullptr)
+            {
+                mMachine = mFactory2->Create();
+            }
+            break;
+            
+        default:
+            // Default to machine 1 if invalid number
+            if (mFactory1 != nullptr)
+            {
+                mMachine = mFactory1->Create();
+            }
+            break;
     }
-    else if (machine == 2 && gMachine2 != nullptr)
+    
+    if (mMachine != nullptr)
     {
-        mMachine = gMachine2;
-        // Make sure the machine number is set correctly
-        mMachine->ChooseMachine(2);
-    }
-    else 
-    {
-        // Fallback to the original behavior
-        mMachine->ChooseMachine(machine);
+        mMachine->SetMachineNum(machine);
+        
+        // Apply current time if the machine is running
+        if (mIsRunning && mTime >= mStartTime)
+        {
+            double runningTime = mTime - mStartTime;
+            mMachine->SetTime(runningTime);
+        }
     }
 }
 
@@ -98,7 +167,7 @@ void MachineSystem::ChooseMachine(int machine)
  */
 int MachineSystem::GetMachineNumber()
 {
-    return mMachine->GetMachineNumber();
+    return mMachineNum;
 }
 
 /**
@@ -107,7 +176,7 @@ int MachineSystem::GetMachineNumber()
  */
 double MachineSystem::GetMachineTime()
 {
-    return mMachine->GetMachineTime();
+    return mTime;
 }
 
 /**
@@ -116,5 +185,67 @@ double MachineSystem::GetMachineTime()
  */
 void MachineSystem::SetFlag(int flag)
 {
-    mMachine->SetFlag(flag);
-} 
+    mFlag = flag;
+    if (mMachine != nullptr)
+    {
+        mMachine->SetFlag(flag);
+    }
+}
+
+/**
+ * Set the time for this machine
+ * @param time Time in seconds
+ */
+void MachineSystem::SetTime(double time)
+{
+    mTime = time;
+    
+    if (mMachine != nullptr)
+    {
+        mMachine->SetTime(time);
+    }
+}
+
+/**
+ * Set the start time for this machine
+ * @param startTime Time in seconds when the machine starts
+ */
+void MachineSystem::SetStartTime(double startTime)
+{
+    mStartTime = startTime;
+}
+
+/**
+ * Set the end time for this machine
+ * @param endTime Time in seconds when the machine stops (0 means run indefinitely)
+ */
+void MachineSystem::SetEndTime(double endTime)
+{
+    mEndTime = endTime;
+}
+
+/**
+ * Determine if the machine should be running at the current time
+ * @return true if running
+ */
+bool MachineSystem::IsRunning()
+{
+    return mIsRunning;
+}
+
+/**
+ * Hit test on the machine
+ * @param pos Position to test
+ * @return true if pos is within the machine
+ */
+bool MachineSystem::HitTest(wxPoint pos)
+{
+    if (mMachine != nullptr)
+    {
+        // Adjust position relative to machine location
+        wxPoint relativePt(pos.x - mPosition.x, pos.y - mPosition.y);
+        return mMachine->HitTest(relativePt);
+    }
+    
+    return false;
+}

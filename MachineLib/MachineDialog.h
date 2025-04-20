@@ -35,7 +35,12 @@ private:
 
 public:
     MachineDialog(wxWindow *parent, std::shared_ptr<IMachineSystem> machineSystem);
-
+    
+    /**
+     * Display the dialog as a modal dialog
+     * @return int result from the dialog
+     */
+    int DoModal();
 };
 
 #endif //CANADIANEXPERIENCE_MACHINEDIALOG_H

@@ -1,93 +1,110 @@
 /**
  * @file Pulley.h
+ * @author Adi M
  *
- * @author Aditya Menon
- *
- * Class representing a pulley component of a machine
+ * A pulley for the machine
  */
-
-#ifndef CANADIANEXPERIENCE_PULLEY_H
-#define CANADIANEXPERIENCE_PULLEY_H
+ 
+#ifndef PULLEY_H
+#define PULLEY_H
 
 #include "Component.h"
-#include <memory>
 #include <vector>
+#include "Source.h"
+#include "Sink.h"
 
-// Forward declarations
-class Machine;
+// Forward references
+class Sink;
+class Source;
 
 /**
- * Class representing a pulley component of a machine
+ * A pulley for the machine
  */
-class Pulley : public Component
-{
+class Pulley : public Component {
 private:
-    /// The radius of the pulley
-    double mRadius = 0;
+    /// The pulley radius
+    double mRadius;
     
-    /// Connected pulleys
-    std::vector<std::shared_ptr<Pulley>> mConnectedPulleys;
+    /// The phase offset in radians
+    double mPhase = 0;
+    
+    /// The pulley driving this one
+    Pulley* mDrivingPulley = nullptr;
+    
+    /// Pulleys connected to this one
+    std::vector<Pulley*> mConnectedPulleys;
+    
+    /// Source for driving other components
+    std::shared_ptr<Source> mSource;
+    
+    /// Sink for receiving rotation from other components
+    std::shared_ptr<Sink> mSink;
 
 public:
     /**
      * Constructor
-     * @param machine The machine this pulley is part of
-     * @param radius The radius of the pulley in pixels
+     * @param radius Radius of the pulley in pixels
      */
-    Pulley(Machine* machine, double radius);
-
-    /** Default constructor (disabled) */
-    Pulley() = delete;
-
-    /** Copy constructor (disabled) */
-    Pulley(const Pulley &) = delete;
-
-    /** Assignment operator (disabled) */
-    void operator=(const Pulley &) = delete;
-
+    Pulley(double radius);
+    
+    void Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position) override;
+    
+    void SetTime(double time) override;
+    
     /**
-     * Set the image for this pulley
-     * @param filename Filename for the image
+     * Set the phase for the pulley
+     * @param phase Phase in radians
      */
-    void SetImage(std::wstring filename);
-
+    void SetPhase(double phase);
+    
     /**
-     * Get the radius of the pulley
-     * @return Radius in pixels
+     * Get the pulley sink for connections
+     * @return Pointer to sink
      */
-    double GetRadius() const { return mRadius; }
-
+    std::shared_ptr<Sink> GetSink();
+    
     /**
-     * Connect this pulley to another pulley
-     * @param pulley The pulley to connect to
+     * Get the pulley source for connections
+     * @return Pointer to source
      */
-    void ConnectPulley(std::shared_ptr<Pulley> pulley);
-
+    std::shared_ptr<Source> GetSource();
+    
     /**
-     * Get the connected pulleys
-     * @return Vector of connected pulleys
+     * Hit test for the pulley
+     * @param pos Position to test
+     * @return true if position is in pulley
      */
-    std::vector<std::shared_ptr<Pulley>> GetConnectedPulleys() const { return mConnectedPulleys; }
-
+    bool HitTest(wxPoint pos) override;
+    
     /**
-     * Test if a point is inside the pulley (for mouse interaction)
-     * @param x X position to test
-     * @param y Y position to test
-     * @return True if the point is inside the pulley
+     * Connect this pulley to another with a belt
+     * @param pulley Pulley to connect to
      */
-    bool HitTest(double x, double y);
-
+    void ConnectBelt(Pulley* pulley);
+    
     /**
-     * Update component for the current time
-     * @param time Current machine time in seconds
+     * Connect another pulley to this one
+     * @param pulley Pulley to connect
      */
-    virtual void SetTime(double time) override;
-
+    void ConnectPulley(Pulley* pulley);
+    
     /**
-     * Draw this pulley
-     * @param graphics Graphics context to draw on
+     * Update the pulley's state
+     * @param time Current time in seconds
      */
-    virtual void Draw(std::shared_ptr<wxGraphicsContext> graphics) override;
+    void Update(double time);
+    
+    /**
+     * Add a sink that will be driven by this pulley
+     * @param sink Pointer to sink component
+     */
+    void AddSink(Component* sink);
+    
+    /**
+     * Get current rotation
+     * @return Rotation in radians
+     */
+    double GetCurrentRotation() { return GetRotation(); }
 };
 
-#endif //CANADIANEXPERIENCE_PULLEY_H 
+#endif //PULLEY_H 

@@ -1,80 +1,48 @@
 /**
  * @file Shape.h
+ * @author Adi M
  *
- * @author Aditya Menon
- *
- * Class representing a shape component of a machine
+ * Class for shapes in the machine system
  */
-
-#ifndef CANADIANEXPERIENCE_SHAPE_H
-#define CANADIANEXPERIENCE_SHAPE_H
+ 
+#ifndef SHAPE_H
+#define SHAPE_H
 
 #include "Component.h"
+#include "Sink.h"
 
 /**
- * Class representing a shape component of a machine
+ * Class that represents a shape component
  */
-class Shape : public Component
-{
-private:
-
+class Shape : public Component, public Sink {
 public:
+    /// Constructor
+    Shape();
+    
     /**
-     * Constructor
-     * @param machine The machine this shape is part of
-     */
-    Shape(Machine* machine);
-
-    /** Default constructor (disabled) */
-    Shape() = delete;
-
-    /** Copy constructor (disabled) */
-    Shape(const Shape &) = delete;
-
-    /** Assignment operator (disabled) */
-    void operator=(const Shape &) = delete;
-
-    /**
-     * Add a point to the shape polygon
+     * Add a point to the shape
      * @param point Point to add
      */
     void AddPoint(wxPoint point);
-
+    
     /**
-     * Set the color of this shape
-     * @param color The color to set
+     * Set the color of the shape
+     * @param color Color to set
      */
-    void SetColor(wxColour color);
-
+    void SetColor(wxColor color);
+    
     /**
-     * Draw this shape
+     * Draw the shape
      * @param graphics Graphics context to draw on
      * @param position Position to draw at
      */
-    void Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position);
-
-    // Methods not in UML but needed for implementation
-
+    void Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position) override;
+    
     /**
-     * Set the image for this shape (not in UML but needed)
-     * @param filename Filename for the image
+     * Set the time for this component
+     * @param time Time in seconds
      */
-    void SetImage(std::wstring filename);
-
-    /**
-     * Create a rectangle shape (not in UML but needed)
-     * @param x Left coordinate
-     * @param y Top coordinate
-     * @param width Width of the rectangle
-     * @param height Height of the rectangle
-     */
-    void Rectangle(double x, double y, double width, double height);
-
-    /**
-     * Override of Component::Draw (not in UML but needed)
-     * @param graphics Graphics context to draw on
-     */
-    void Draw(std::shared_ptr<wxGraphicsContext> graphics) override;
+    void SetTime(double time) override;
 };
 
-#endif //CANADIANEXPERIENCE_SHAPE_H 
+#endif //SHAPE_H 

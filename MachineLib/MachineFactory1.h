@@ -1,40 +1,42 @@
 /**
  * @file MachineFactory1.h
+ * @author Your Name
  *
- * @author Aditya Menon
- *
- * Factory class that creates Machine 1
+ * Factory class for creating type 1 machines
  */
-
-#ifndef CANADIANEXPERIENCE_MACHINEFACTORY1_H
-#define CANADIANEXPERIENCE_MACHINEFACTORY1_H
+ 
+#ifndef MACHINEFACTORY1_H
+#define MACHINEFACTORY1_H
 
 #include <memory>
 #include <string>
 
+// Forward references
 class Machine;
 
 /**
- * Factory class that creates Machine 1
+ * Factory class that creates type 1 machines
  */
-class MachineFactory1
-{
+class MachineFactory1 {
 private:
-    /// Directory containing the machine images
+    /// Resources directory
+    std::wstring mResourcesDir;
+    
+    /// Images directory
     std::wstring mImagesDir;
 
 public:
     /**
      * Constructor
-     * @param imagesDir Directory containing the machine images
+     * @param resourcesDir Path to the resources directory
      */
-    MachineFactory1(std::wstring imagesDir) : mImagesDir(imagesDir) {}
-
+    MachineFactory1(std::wstring resourcesDir);
+    
     /**
      * Create a machine of type 1
-     * @return The created machine
+     * @return Pointer to created machine
      */
     std::shared_ptr<Machine> Create();
 };
 
-#endif //CANADIANEXPERIENCE_MACHINEFACTORY1_H 
+#endif //MACHINEFACTORY1_H 

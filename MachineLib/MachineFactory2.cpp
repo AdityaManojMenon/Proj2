@@ -1,86 +1,89 @@
 /**
  * @file MachineFactory2.cpp
- *
- * @author Aditya Menon
+ * @author Anik Momtaz
  */
 
 #include "pch.h"
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 #include "MachineFactory2.h"
 #include "Machine.h"
-#include "Shape.h"
 #include "Motor.h"
 #include "Pulley.h"
+#include "Shape.h"
+
+using namespace std;
+
+/// The images directory in resources
+const std::wstring ImagesDirectory = L"/images";
 
 /**
- * Create a machine of type 2
- * @return The created machine
+ * Constructor
+ * @param resourcesDir Path to the resources directory
+ */
+MachineFactory2::MachineFactory2(std::wstring resourcesDir) :
+        mResourcesDir(resourcesDir)
+{
+    // If a resource directory isn't provided, use the executable path
+    if (mResourcesDir.empty())
+    {
+        // Get directory the executable is in
+        auto exePath = wxStandardPaths::Get().GetExecutablePath();
+        mResourcesDir = wxFileName(exePath).GetPath().ToStdWstring();
+    }
+    
+    mImagesDir = mResourcesDir + ImagesDirectory;
+}
+
+/**
+ * Factory method to create machine
+ * @return Pointer to created machine
  */
 std::shared_ptr<Machine> MachineFactory2::Create()
 {
-    // The machine itself
-    auto machine = std::make_shared<Machine>();
+    // Create a machine of a different type
+    auto machine = std::make_shared<Machine>(2);
 
-    const int BaseWidth = 325;   // Width of the base
-    const int BaseHeight = 40;   // Height of the base
-
-    const int MotorX = 0;        // Motor X location
-    const int MotorY = 0;        // Motor Y location
+    const int BaseWidth = 350;  // Width of the base
+    const int BaseHeight = 45;  // Height of the base
     
-    const int PostWidth = 20;    // Width of the post image
-    const int PostHeight = 120;  // Height of the post image
-
     //
-    // The base - using the sample code approach
+    // The base
     //
-    auto base = std::make_shared<Shape>(machine.get());
+    auto base = std::make_shared<Shape>();
     base->Rectangle(-BaseWidth/2, 0, BaseWidth, BaseHeight);
-    base->SetImage(mImagesDir + L"/base.png");
+    base->SetImage(mImagesDir + L"/base2.png");
     machine->AddComponent(base);
-
-    // Left post - 35% taller
-    auto leftPost = std::make_shared<Shape>(machine.get());
-    leftPost->Rectangle(-PostWidth/2, -PostHeight * 1.35, PostWidth, PostHeight * 1.35);
-    leftPost->SetImage(mImagesDir + L"/post.png");
-    leftPost->SetPosition(-BaseWidth/2 + 50, 0);
-    machine->AddComponent(leftPost);
-
-    // Right post - normal size
-    auto rightPost = std::make_shared<Shape>(machine.get());
-    rightPost->Rectangle(-PostWidth/2, -PostHeight, PostWidth, PostHeight);
-    rightPost->SetImage(mImagesDir + L"/post.png");
-    rightPost->SetPosition(BaseWidth/2 - 50, 0);
-    machine->AddComponent(rightPost);
 
     //
     // The motor
     //
-    auto motor = std::make_shared<Motor>(machine.get());
-    motor->SetPosition(MotorX, MotorY);
-    motor->SetSpeed(1.0);    // Set the motor speed to exactly 1 rotation per second
-    motor->SetRunning(true);
+    auto motor = std::make_shared<Motor>(mImagesDir);
+    motor->SetPosition(30, -40);
+    motor->SetSpeed(0.5); // Half speed for machine type 2
     machine->AddComponent(motor);
 
     //
-    // The pulleys 
-    // (only 2 external pulleys that connect to motor's shaft)
+    // First pulley driven by the motor
     //
-    
-    // Pulley 1 (Left pulley)
-    auto pulley1 = std::make_shared<Pulley>(machine.get(), 25);
-    pulley1->SetImage(mImagesDir + L"/pulley4.png");
-    pulley1->SetPosition(-BaseWidth/4, 125);
+    auto pulley1 = std::make_shared<Pulley>(20);
+    pulley1->SetImage(mImagesDir + L"/pulley1.png");
+    pulley1->SetPosition(30, -100);
     machine->AddComponent(pulley1);
-    motor->AddComponent(pulley1);
     
-    // Pulley 2 (Right pulley)
-    auto pulley2 = std::make_shared<Pulley>(machine.get(), 20);
-    pulley2->SetImage(mImagesDir + L"/pulley4.png");
-    pulley2->SetPosition(BaseWidth/4, 125);
+    //
+    // Second pulley driven by the first
+    //
+    auto pulley2 = std::make_shared<Pulley>(15);
+    pulley2->SetImage(mImagesDir + L"/gear1.png");
+    pulley2->SetPosition(100, -100);
+    pulley2->SetPhase(0.25); // Quarter turn offset
     machine->AddComponent(pulley2);
-    motor->AddComponent(pulley2);
-    
-    // Motor's shaft is already the source pulley, no need to create it
-    // The connections are handled automatically by the motor when adding components
+
+    // Connect the components
+    motor->AddSink(pulley1.get());
+    // In a real implementation, we would connect pulley1 to pulley2
+    // pulley1->AddSink(pulley2.get());
 
     return machine;
 } 
