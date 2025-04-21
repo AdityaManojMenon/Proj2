@@ -15,21 +15,53 @@ class Source;
 class Component;
 
 /**
- * Class for a sink component
+ * Class for a rotation sink
  */
 class Sink {
 private:
-    /// The source that drives this sink
-    Source* mSource = nullptr;
-    
-    /// Current rotation in radians
-    double mRotation = 0;
-    
-    /// The component this sink is associated with
+    /// The component we are connected to
     Component* mComponent = nullptr;
 
+    /// The current rotation value
+    double mRotation = 0;
+    
+    /// The source that drives this sink
+    Source* mSource = nullptr;
+
 public:
+    /**
+     * Constructor
+     */
     Sink() {}
+
+    /**
+     * Destructor
+     */
+    virtual ~Sink() {}
+
+    /**
+     * Set the rotation value for this sink
+     * @param rotation New rotation value
+     */
+    virtual void SetRotation(double rotation);
+
+    /**
+     * Get the current rotation value
+     * @return Current rotation in rotations (0-1)
+     */
+    double GetRotation() { return mRotation; }
+
+    /**
+     * Set the component this sink is connected to
+     * @param component Component pointer
+     */
+    void SetComponent(Component* component) { mComponent = component; }
+
+    /**
+     * Get the component this sink is connected to
+     * @return Component pointer
+     */
+    Component* GetComponent() { return mComponent; }
     
     /**
      * Set the source that drives this sink
@@ -41,31 +73,11 @@ public:
      * Get the source that drives this sink
      * @return Source pointer
      */
-    Source* GetSource() const { return mSource; }
-    
-    /**
-     * Set the rotation for this sink
-     * @param rotation Rotation in radians
-     */
-    void SetRotation(double rotation) { mRotation = rotation; }
-    
-    /**
-     * Get the current rotation
-     * @return Rotation in radians
-     */
-    double GetRotation() const { return mRotation; }
-    
-    /**
-     * Set the component this sink is associated with
-     * @param component Component pointer
-     */
-    void SetComponent(Component* component) { mComponent = component; }
-    
-    /**
-     * Get the component this sink is associated with
-     * @return Component pointer
-     */
-    Component* GetComponent() const { return mComponent; }
+    Source* GetSource() { return mSource; }
 };
 
 #endif //SINK_H 
+ 
+ 
+ 
+ 

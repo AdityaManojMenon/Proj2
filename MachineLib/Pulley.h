@@ -28,11 +28,17 @@ private:
     /// The phase offset in radians
     double mPhase = 0;
     
+    /// Speed multiplier (1.0 = same speed as source)
+    double mSpeedMultiplier = 1.0;
+    
     /// The pulley driving this one
     Pulley* mDrivingPulley = nullptr;
     
     /// Pulleys connected to this one
     std::vector<Pulley*> mConnectedPulleys;
+    
+    /// Components directly driven by this pulley (not via Source/Sink)
+    std::vector<Component*> mDrivenComponents;
     
     /// Source for driving other components
     std::shared_ptr<Source> mSource;
@@ -56,6 +62,18 @@ public:
      * @param phase Phase in radians
      */
     void SetPhase(double phase);
+    
+    /**
+     * Set the speed multiplier for this pulley
+     * @param multiplier Speed multiplier (1.0 = same as source)
+     */
+    void SetSpeedMultiplier(double multiplier) { mSpeedMultiplier = multiplier; }
+    
+    /**
+     * Get the speed multiplier for this pulley
+     * @return Speed multiplier
+     */
+    double GetSpeedMultiplier() const { return mSpeedMultiplier; }
     
     /**
      * Get the pulley sink for connections
@@ -104,7 +122,17 @@ public:
      * Get current rotation
      * @return Rotation in radians
      */
-    double GetCurrentRotation() { return GetRotation(); }
+    double GetCurrentRotation() { return Component::GetCurrentRotation(); }
+    
+    /**
+     * Override to propagate rotation to connected components
+     * @param rotation Rotation in radians
+     */
+    void SetCurrentRotation(double rotation) override;
 };
 
 #endif //PULLEY_H 
+ 
+ 
+ 
+ 

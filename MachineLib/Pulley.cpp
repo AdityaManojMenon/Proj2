@@ -44,7 +44,7 @@ void Pulley::ConnectBelt(Pulley* pulley)
     mConnectedPulleys.push_back(pulley);
     pulley->mDrivingPulley = this;
     
-    // Connect our source to their sink
+    // Important: Connect source and sink properly
     if (mSource != nullptr && pulley->GetSink() != nullptr)
     {
         mSource->AddSink(pulley->GetSink().get());
@@ -88,7 +88,23 @@ bool Pulley::HitTest(wxPoint pos)
  */
 void Pulley::ConnectPulley(Pulley* pulley)
 {
-    ConnectBelt(pulley);
+    if (pulley == nullptr)
+    {
+        return;
+    }
+    
+    // Add the pulley to our connected pulleys
+    mConnectedPulleys.push_back(pulley);
+    
+    // Set this pulley as the driving pulley for the connected pulley
+    pulley->mDrivingPulley = this;
+    
+    // IMPORTANT: For pulleys on the same shaft, they rotate together directly
+    // The difference from ConnectBelt is we don't adjust for radius differences
+    if (mSource != nullptr && pulley->GetSink() != nullptr)
+    {
+        mSource->AddSink(pulley->GetSink().get());
+    }
 }
 
 /**
@@ -99,16 +115,38 @@ void Pulley::SetTime(double time)
 {
     Component::SetTime(time);
     
-    // Get the current rotation that was set by the motor
+    // Get the current rotation that was set by the motor or driving pulley
     double rotation = GetCurrentRotation();
     
     // Apply rotation to the pulley base with phase offset
-    GetBase()->SetRotation(rotation + mPhase);
+    // Use 2*PI for a full rotation
+    if (GetBase() != nullptr)
+    {
+        GetBase()->SetRotation(rotation + mPhase * 2 * M_PI);
+    }
     
     // Update the source rotation to drive other components
     if (mSource != nullptr)
     {
         mSource->SetRotation(rotation);
+    }
+    
+    // Make sure to propagate rotation to all connected pulleys
+    for (auto pulley : mConnectedPulleys)
+    {
+        if (pulley != nullptr && pulley != mDrivingPulley)
+        {
+            pulley->SetCurrentRotation(rotation);
+        }
+    }
+    
+    // Directly update any non-pulley components we're driving
+    for (auto component : mDrivenComponents)
+    {
+        if (component != nullptr)
+        {
+            component->SetCurrentRotation(rotation);
+        }
     }
 }
 
@@ -148,10 +186,49 @@ void Pulley::AddSink(Component* sink)
     // For components that have a sink, add it to our source
     if (sink != nullptr)
     {
+        // First try to connect as a Pulley
         auto pulley = dynamic_cast<Pulley*>(sink);
         if (pulley != nullptr && pulley->GetSink() != nullptr && mSource != nullptr)
         {
             mSource->AddSink(pulley->GetSink().get());
+            return;
+        }
+        
+        // If not a pulley, store it directly for manual rotation updates
+        // This handles Shape objects which don't have proper Sink implementations
+        // We'll update these directly during SetTime
+        if (mSource != nullptr)
+        {
+            // Just store the component for rotation updates
+            mDrivenComponents.push_back(sink);
+        }
+    }
+}
+
+/**
+ * Override SetCurrentRotation to propagate rotation to connected components
+ * @param rotation Rotation in radians
+ */
+void Pulley::SetCurrentRotation(double rotation)
+{
+    // Apply speed multiplier to the received rotation
+    double adjustedRotation = rotation * mSpeedMultiplier;
+    
+    // Call the base class implementation with the adjusted rotation
+    Component::SetCurrentRotation(adjustedRotation);
+    
+    // Now propagate this adjusted rotation to our source
+    if (mSource != nullptr)
+    {
+        mSource->SetRotation(adjustedRotation);
+    }
+    
+    // Directly update any other components we're driving
+    for (auto component : mDrivenComponents)
+    {
+        if (component != nullptr)
+        {
+            component->SetCurrentRotation(adjustedRotation);
         }
     }
 } 

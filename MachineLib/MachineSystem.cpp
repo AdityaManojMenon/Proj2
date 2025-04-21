@@ -2,7 +2,7 @@
  * @file MachineSystem.cpp
  * @author Adi M
  */
-
+ 
 #include "pch.h"
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
@@ -10,6 +10,7 @@
 #include "Machine.h"
 #include "MachineFactory1.h"
 #include "MachineFactory2.h"
+#include "Component.h"
 
 /// The images directory
 const std::wstring ImagesDirectory = L"/images";
@@ -33,12 +34,19 @@ MachineSystem::MachineSystem(const std::wstring& resourcesDir)
     // Set up the images directory
     imageDir = mResourcesDir + ImagesDirectory;
     
+    // Initialize default values
+    mFrameRate = 30.0;      // Default to 30 frames per second
+    mMachineNum = 1;        // Default to machine 1
+    mFrame = 0;
+    mTime = 0;
+    mPosition = wxPoint(400, 400);  // Set machine at center of window
+    
     // Create machine factories
-    mFactory1 = std::make_shared<MachineFactory1>(mResourcesDir);
-    mFactory2 = std::make_shared<MachineFactory2>(mResourcesDir);
+    mFactory1 = MachineFactory1::Create(mResourcesDir);
+    mFactory2 = MachineFactory2::Create(mResourcesDir);
     
     // Create initial machine (machine #1)
-    ChooseMachine(1);
+    mMachine = mFactory1->Create();
 }
 
 /**
@@ -68,7 +76,14 @@ void MachineSystem::DrawMachine(std::shared_ptr<wxGraphicsContext> graphics)
     // Just forward to the machine's Draw function
     if (mMachine != nullptr)
     {
+        // Draw the machine
         mMachine->Draw(graphics, mPosition);
+    }
+    else
+    {
+        // If machine is null, draw a visual indication
+        graphics->SetBrush(wxBrush(wxColour(255, 0, 0)));
+        graphics->DrawRectangle(mPosition.x, mPosition.y, 100, 100);
     }
 }
 
@@ -80,27 +95,30 @@ void MachineSystem::SetMachineFrame(int frame)
 {
     mFrame = frame;
     
-    // Compute time in seconds based on frame rate
+    // Compute the new machine time
+    double machineTime = mFrame / mFrameRate;
+    
+    // If we are at a valid frame rate
     if (mFrameRate > 0)
     {
-        mTime = double(frame) / mFrameRate;
-    }
-    
-    // Check if the machine should be running based on start/end times
-    mIsRunning = (mTime >= mStartTime) && (mEndTime == 0 || mTime <= mEndTime);
-    
-    if (mMachine != nullptr)
-    {
-        if (mIsRunning)
+        if (machineTime >= mStartTime && (mEndTime <= 0 || machineTime <= mEndTime))
         {
-            // If running, update with the time since start
-            double runningTime = mTime - mStartTime;
-            mMachine->SetTime(runningTime);
+            // Machine is running
+            mIsRunning = true;
+            
+            // Compute the time relative to the start time
+            double runningTime = machineTime - mStartTime;
+            
+            // Set the machine time
+            this->SetTime(runningTime);
         }
         else
         {
-            // If not running, set to time 0 (stopped state)
-            mMachine->SetTime(0);
+            // Machine is not running
+            mIsRunning = false;
+            
+            // Reset the machine
+            this->SetTime(0);
         }
     }
 }
@@ -120,43 +138,35 @@ void MachineSystem::SetFrameRate(double rate)
  */
 void MachineSystem::ChooseMachine(int machine)
 {
-    mMachineNum = machine;
-    
-    // Create a machine based on the machine number
-    switch(machine)
+    if (machine != mMachineNum)
     {
+        mMachineNum = machine;
+        
+        switch (machine)
+        {
         case 1:
-            if (mFactory1 != nullptr)
-            {
-                mMachine = mFactory1->Create();
-            }
+            mMachine = mFactory1->Create();
             break;
             
         case 2:
-            if (mFactory2 != nullptr)
-            {
-                mMachine = mFactory2->Create();
-            }
+            mMachine = mFactory2->Create();
             break;
             
         default:
-            // Default to machine 1 if invalid number
-            if (mFactory1 != nullptr)
-            {
-                mMachine = mFactory1->Create();
-            }
+            // If invalid machine number, default to machine 1
+            mMachine = mFactory1->Create();
             break;
-    }
-    
-    if (mMachine != nullptr)
-    {
-        mMachine->SetMachineNum(machine);
+        }
         
-        // Apply current time if the machine is running
-        if (mIsRunning && mTime >= mStartTime)
+        double machineTime = mFrame / mFrameRate;
+        
+        if (machineTime >= mStartTime && (mEndTime <= 0 || machineTime <= mEndTime))
         {
-            double runningTime = mTime - mStartTime;
-            mMachine->SetTime(runningTime);
+            // Machine is running
+            double runningTime = machineTime - mStartTime;
+            
+            // Set the machine time
+            this->SetTime(runningTime);
         }
     }
 }
@@ -185,7 +195,6 @@ double MachineSystem::GetMachineTime()
  */
 void MachineSystem::SetFlag(int flag)
 {
-    mFlag = flag;
     if (mMachine != nullptr)
     {
         mMachine->SetFlag(flag);
@@ -202,7 +211,26 @@ void MachineSystem::SetTime(double time)
     
     if (mMachine != nullptr)
     {
-        mMachine->SetTime(time);
+        // Get the components from the machine
+        auto& components = mMachine->GetComponents();
+        
+        // First pass: update all components for time
+        for(auto component : components)
+        {
+            component->SetTime(time);
+        }
+        
+        // Second pass: ensure rotation propagation
+        for(auto component : components)
+        {
+            component->SetTime(time);
+        }
+        
+        // Third pass to fully synchronize
+        for(auto component : components)
+        {
+            component->SetTime(time);
+        }
     }
 }
 

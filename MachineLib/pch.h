@@ -13,5 +13,7 @@
 #endif
 
 #include <wx/graphics.h>
+#include <wx/dcbuffer.h>
+#include <wx/filename.h>
 
 #endif //MACHINELIB_PCH_H

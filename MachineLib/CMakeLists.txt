@@ -19,6 +19,8 @@ set(SOURCE_FILES
         Sink.cpp Sink.h
         MachineFactory1.cpp MachineFactory1.h
         MachineFactory2.cpp MachineFactory2.h
+        Bubble.cpp Bubble.h
+        BubbleBlower.cpp BubbleBlower.h
         Const.cpp Const.h
 )
 

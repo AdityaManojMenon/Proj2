@@ -1,6 +1,6 @@
 /**
  * @file Component.h
- * @author Adi M
+ * @author Aditya Menon
  *
  * Base class for components
  */
@@ -85,7 +85,13 @@ public:
      * Set the current rotation of the component
      * @param rotation Rotation in radians
      */
-    void SetCurrentRotation(double rotation);
+    virtual void SetCurrentRotation(double rotation);
+    
+    /**
+     * Get the current rotation of the component
+     * @return Current rotation in radians
+     */
+    double GetCurrentRotation() const { return mCurrentRotation; }
     
     /**
      * Get the machine this component is associated with

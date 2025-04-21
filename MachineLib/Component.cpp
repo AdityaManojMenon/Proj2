@@ -1,8 +1,8 @@
 /**
  * @file Component.cpp
- * @author Adi M
+ * @author Aditya Menon
  */
-
+ 
 #include "pch.h"
 #include "Component.h"
 #include "Machine.h"
@@ -46,7 +46,11 @@ void Component::Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint positi
     
     if(mBase != nullptr)
     {
+        // Make sure current rotation with phase is applied to the base
+        // This ensures motor and pulley rotations are properly visualized
         mBase->SetRotation(mCurrentRotation + mPhase * 2 * M_PI);
+        
+        // Draw the polygon
         mBase->DrawPolygon(graphics, actualPosition.x, actualPosition.y);
     }
 }
@@ -76,6 +80,8 @@ std::shared_ptr<cse335::Polygon> Component::GetBase()
 void Component::SetTime(double time)
 {
     // Base implementation does nothing with time
+    // Components only rotate when explicitly driven by
+    // a motor or pulley through the SetCurrentRotation method
 }
 
 /**

@@ -64,8 +64,18 @@ double Motor::GetSpeed()
  */
 void Motor::Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position)
 {
-    // Only draw the base - no shaft
-    Component::Draw(graphics, position);
+    // Calculate the actual position considering component position
+    wxPoint actualPosition = wxPoint(position.x + GetPosition().x, position.y + GetPosition().y);
+    
+    if(GetBase() != nullptr)
+    {
+        // Important: Do NOT apply rotation to the motor base
+        // Override the default Component::Draw behavior to keep motor static
+        GetBase()->SetRotation(0);  // Keep motor at 0 rotation
+        
+        // Draw the polygon
+        GetBase()->DrawPolygon(graphics, actualPosition.x, actualPosition.y);
+    }
 }
 
 /**
@@ -77,13 +87,18 @@ void Motor::SetTime(double time)
     Component::SetTime(time);
     
     // Compute rotation based on time and speed
-    // 1 rotation per second times speed
-    double rotation = time * mSpeed;
+    // For slower rotation, divide speed by a factor
+    double adjustedSpeed = mSpeed / 5.0;  // 5x slower rotation
+    double rotation = time * adjustedSpeed;
     
-    // Calculate rotation in radians - exactly one rotation per second
+    // Calculate rotation in radians
     double rotationRadians = rotation * 2 * M_PI;
     
-    // Update all components driven by this motor
+    // Store the rotation value but don't apply it to our base polygon
+    // This prevents the motor image from rotating
+    SetCurrentRotation(rotationRadians);
+    
+    // Only drive components that are explicitly connected to this motor
     for (auto component : mDrivenComponents)
     {
         if (component != nullptr)

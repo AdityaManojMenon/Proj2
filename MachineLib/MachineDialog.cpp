@@ -103,9 +103,7 @@ void MachineDialog::OnInitDialog([[maybe_unused]] wxInitDialogEvent& event)
 {
     TransferDataToWindow();
     mMachineNumberCtrl->SelectAll();
-}
-
-/**
+}/**
  * Display the dialog as a modal dialog
  * @return int result from the dialog
  */
@@ -113,3 +111,4 @@ int MachineDialog::DoModal()
 {
     return ShowModal();
 }
+

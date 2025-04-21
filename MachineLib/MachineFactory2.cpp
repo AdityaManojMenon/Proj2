@@ -4,8 +4,6 @@
  */
 
 #include "pch.h"
-#include <wx/filename.h>
-#include <wx/stdpaths.h>
 #include "MachineFactory2.h"
 #include "Machine.h"
 #include "Motor.h"
@@ -14,33 +12,18 @@
 
 using namespace std;
 
-/// The images directory in resources
-const std::wstring ImagesDirectory = L"/images";
-
-/**
- * Constructor
- * @param resourcesDir Path to the resources directory
- */
-MachineFactory2::MachineFactory2(std::wstring resourcesDir) :
-        mResourcesDir(resourcesDir)
-{
-    // If a resource directory isn't provided, use the executable path
-    if (mResourcesDir.empty())
-    {
-        // Get directory the executable is in
-        auto exePath = wxStandardPaths::Get().GetExecutablePath();
-        mResourcesDir = wxFileName(exePath).GetPath().ToStdWstring();
-    }
-    
-    mImagesDir = mResourcesDir + ImagesDirectory;
-}
-
 /**
  * Factory method to create machine
  * @return Pointer to created machine
  */
 std::shared_ptr<Machine> MachineFactory2::Create()
 {
+    /// The images directory in resources
+    const std::wstring ImagesDirectory = L"/images";
+    
+    // Simply append the images directory to whatever path is provided
+    mImagesDir = mResourcesDir + ImagesDirectory;
+    
     // Create a machine of a different type
     auto machine = std::make_shared<Machine>(2);
 
@@ -52,7 +35,7 @@ std::shared_ptr<Machine> MachineFactory2::Create()
     //
     auto base = std::make_shared<Shape>();
     base->Rectangle(-BaseWidth/2, 0, BaseWidth, BaseHeight);
-    base->SetImage(mImagesDir + L"/base2.png");
+    base->SetImage(mImagesDir + L"/base.png");
     machine->AddComponent(base);
 
     //
@@ -75,7 +58,7 @@ std::shared_ptr<Machine> MachineFactory2::Create()
     // Second pulley driven by the first
     //
     auto pulley2 = std::make_shared<Pulley>(15);
-    pulley2->SetImage(mImagesDir + L"/gear1.png");
+    pulley2->SetImage(mImagesDir + L"/pulley2.png");
     pulley2->SetPosition(100, -100);
     pulley2->SetPhase(0.25); // Quarter turn offset
     machine->AddComponent(pulley2);
@@ -87,3 +70,7 @@ std::shared_ptr<Machine> MachineFactory2::Create()
 
     return machine;
 } 
+ 
+ 
+ 
+ 

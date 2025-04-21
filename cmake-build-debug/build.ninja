@@ -626,6 +626,26 @@ build MachineLib/CMakeFiles/MachineLib.dir/MachineFactory2.cpp.o: CXX_COMPILER__
   TARGET_COMPILE_PDB = MachineLib/CMakeFiles/MachineLib.dir/MachineLib.pdb
   TARGET_PDB = MachineLib/libMachineLib.pdb
 
+build MachineLib/CMakeFiles/MachineLib.dir/Bubble.cpp.o: CXX_COMPILER__MachineLib_unscanned_Debug /Users/am/Desktop/Proj2/MachineLib/Bubble.cpp || cmake_object_order_depends_target_MachineLib
+  DEFINES = -DWXUSINGDLL -D_FILE_OFFSET_BITS=64 -D__WXMAC__ -D__WXOSX_COCOA__ -D__WXOSX__
+  DEP_FILE = MachineLib/CMakeFiles/MachineLib.dir/Bubble.cpp.o.d
+  FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=10.14 -fcolor-diagnostics
+  INCLUDES = -I/Users/am/Desktop/Proj2/CanadianExperienceLib -isystem /usr/local/lib/wx/include/osx_cocoa-unicode-3.2 -isystem /usr/local/include/wx-3.2
+  OBJECT_DIR = MachineLib/CMakeFiles/MachineLib.dir
+  OBJECT_FILE_DIR = MachineLib/CMakeFiles/MachineLib.dir
+  TARGET_COMPILE_PDB = MachineLib/CMakeFiles/MachineLib.dir/MachineLib.pdb
+  TARGET_PDB = MachineLib/libMachineLib.pdb
+
+build MachineLib/CMakeFiles/MachineLib.dir/BubbleBlower.cpp.o: CXX_COMPILER__MachineLib_unscanned_Debug /Users/am/Desktop/Proj2/MachineLib/BubbleBlower.cpp || cmake_object_order_depends_target_MachineLib
+  DEFINES = -DWXUSINGDLL -D_FILE_OFFSET_BITS=64 -D__WXMAC__ -D__WXOSX_COCOA__ -D__WXOSX__
+  DEP_FILE = MachineLib/CMakeFiles/MachineLib.dir/BubbleBlower.cpp.o.d
+  FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=10.14 -fcolor-diagnostics
+  INCLUDES = -I/Users/am/Desktop/Proj2/CanadianExperienceLib -isystem /usr/local/lib/wx/include/osx_cocoa-unicode-3.2 -isystem /usr/local/include/wx-3.2
+  OBJECT_DIR = MachineLib/CMakeFiles/MachineLib.dir
+  OBJECT_FILE_DIR = MachineLib/CMakeFiles/MachineLib.dir
+  TARGET_COMPILE_PDB = MachineLib/CMakeFiles/MachineLib.dir/MachineLib.pdb
+  TARGET_PDB = MachineLib/libMachineLib.pdb
+
 build MachineLib/CMakeFiles/MachineLib.dir/Const.cpp.o: CXX_COMPILER__MachineLib_unscanned_Debug /Users/am/Desktop/Proj2/MachineLib/Const.cpp || cmake_object_order_depends_target_MachineLib
   DEFINES = -DWXUSINGDLL -D_FILE_OFFSET_BITS=64 -D__WXMAC__ -D__WXOSX_COCOA__ -D__WXOSX__
   DEP_FILE = MachineLib/CMakeFiles/MachineLib.dir/Const.cpp.o.d
@@ -644,7 +664,7 @@ build MachineLib/CMakeFiles/MachineLib.dir/Const.cpp.o: CXX_COMPILER__MachineLib
 #############################################
 # Link the static library MachineLib/libMachineLib.a
 
-build MachineLib/libMachineLib.a: CXX_STATIC_LIBRARY_LINKER__MachineLib_Debug MachineLib/CMakeFiles/MachineLib.dir/MachineSystemFactory.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineDialog.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineSystemStandin.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineStandin.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Polygon.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Machine.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineSystem.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Component.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Motor.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Pulley.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Shape.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Source.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Sink.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineFactory1.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineFactory2.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Const.cpp.o
+build MachineLib/libMachineLib.a: CXX_STATIC_LIBRARY_LINKER__MachineLib_Debug MachineLib/CMakeFiles/MachineLib.dir/MachineSystemFactory.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineDialog.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineSystemStandin.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineStandin.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Polygon.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Machine.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineSystem.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Component.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Motor.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Pulley.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Shape.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Source.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Sink.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineFactory1.cpp.o MachineLib/CMakeFiles/MachineLib.dir/MachineFactory2.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Bubble.cpp.o MachineLib/CMakeFiles/MachineLib.dir/BubbleBlower.cpp.o MachineLib/CMakeFiles/MachineLib.dir/Const.cpp.o
   ARCH_FLAGS = -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=10.14
   LANGUAGE_COMPILE_FLAGS = -g
   OBJECT_DIR = MachineLib/CMakeFiles/MachineLib.dir

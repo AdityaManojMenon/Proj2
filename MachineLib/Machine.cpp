@@ -1,6 +1,6 @@
 /**
  * @file Machine.cpp
- * @author Adi M
+ * @author Aditya Menon
  */
  
 #include "pch.h"
@@ -29,9 +29,13 @@ Machine::Machine(int machineNum) : mMachineNum(machineNum)
  */
 void Machine::Draw(std::shared_ptr<wxGraphicsContext> graphics, wxPoint position)
 {
+    // Draw all components
     for(auto component : mComponents)
     {
-        component->Draw(graphics, position);
+        if (component != nullptr)
+        {
+            component->Draw(graphics, position);
+        }
     }
 }
 
@@ -43,6 +47,15 @@ void Machine::AddComponent(std::shared_ptr<Component> component)
 {
     mComponents.push_back(component);
     component->SetMachine(this);
+}
+
+/**
+ * Set the motor for this machine
+ * @param motor Motor component
+ */
+void Machine::SetMotor(std::shared_ptr<Component> motor)
+{
+    mMotor = motor;
 }
 
 /**
@@ -97,16 +110,4 @@ void Machine::SetFlag(int flag)
 int Machine::GetMachineNum()
 {
     return mMachineNum;
-}
-
-/**
- * Set the machine time
- * @param time Machine time in seconds
- */
-void Machine::SetTime(double time)
-{
-    for(auto component : mComponents)
-    {
-        component->SetTime(time);
-    }
 }

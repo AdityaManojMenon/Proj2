@@ -230,6 +230,8 @@ namespace cse335 {
 
         wxPoint2DDouble Center();
         wxRect2DDouble BoundingBox();
+
+        bool IsImageSet() { return mImage != nullptr; }
     };
 
 

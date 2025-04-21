@@ -1,8 +1,8 @@
 /**
  * @file Machine.h
- * @author Adi M
+ * @author Aditya Menon
  *
- * Class for the machine
+ * Class for a machine
  */
  
 #ifndef MACHINE_H
@@ -16,18 +16,21 @@ class Component;
 class MachineSystem;
 
 /**
- * Class for the machine
+ * Class for a machine
  */
 class Machine {
 private:
-    /// Machine number
+    /// The machine number
     int mMachineNum = 0;
     
-    /// Flag value
+    /// Flag value for the machine
     int mFlag = 0;
     
-    /// The components that make up the machine
+    /// The components in this machine
     std::vector<std::shared_ptr<Component>> mComponents;
+    
+    /// The motor component
+    std::shared_ptr<Component> mMotor;
 
 public:
     Machine();
@@ -52,8 +55,14 @@ public:
     void AddComponent(std::shared_ptr<Component> component);
     
     /**
+     * Set the motor for this machine
+     * @param motor Motor component
+     */
+    void SetMotor(std::shared_ptr<Component> motor);
+    
+    /**
      * Get a pointer to the machine system
-     * @return Pointer to IMachineSystem object
+     * @return Pointer to MachineSystem object
      */
     MachineSystem* GetSystem();
     
@@ -83,10 +92,10 @@ public:
     int GetMachineNum();
     
     /**
-     * Set the machine time
-     * @param time Machine time in seconds
+     * Get the components in this machine
+     * @return Vector of components
      */
-    void SetTime(double time);
+    std::vector<std::shared_ptr<Component>>& GetComponents() { return mComponents; }
 };
 
 #endif //MACHINE_H
