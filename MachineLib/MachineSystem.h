@@ -1,6 +1,6 @@
 /**
  * @file MachineSystem.h
- * @author Adi M
+ * @author Aditya Menon
  *
  * Implementation of the machine system
  */

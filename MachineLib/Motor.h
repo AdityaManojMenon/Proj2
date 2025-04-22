@@ -1,6 +1,6 @@
 /**
  * @file Motor.h
- * @author Adi M
+ * @author Aditya Menon
  *
  * Class for a motor
  */

@@ -13,10 +13,17 @@
 #include "ViewTimeline.h"
 #include "Picture.h"
 #include "PictureFactory.h"
+#include "MachineAdapter.h"
+#include "MachinePropertiesDialog.h"
 
 /// Directory within resources that contains the images.
 const std::wstring ImagesDirectory = L"/images";
 
+// Machine menu constants
+const int ID_MACHINE1_PROPERTIES = wxID_HIGHEST + 300;
+const int ID_MACHINE1_SELECT = wxID_HIGHEST + 301;
+const int ID_MACHINE2_PROPERTIES = wxID_HIGHEST + 302;
+const int ID_MACHINE2_SELECT = wxID_HIGHEST + 303;
 
 /**
  * Constructor
@@ -66,6 +73,23 @@ void MainFrame::Initialize()
     // Tell the views about the picture
     mViewEdit->SetPicture(mPicture);
     mViewTimeline->SetPicture(mPicture);
+
+    // Add a machine menu
+    auto machineMenu = new wxMenu();
+    machineMenu->Append(ID_MACHINE1_PROPERTIES, L"Machine 1 &Properties...\tCtrl+1", L"Set Machine 1 Properties");
+    machineMenu->Append(ID_MACHINE1_SELECT, L"Machine 1 &Select Type...", L"Select Machine 1 Type");
+    machineMenu->AppendSeparator();
+    machineMenu->Append(ID_MACHINE2_PROPERTIES, L"Machine 2 P&roperties...\tCtrl+2", L"Set Machine 2 Properties");
+    machineMenu->Append(ID_MACHINE2_SELECT, L"Machine 2 S&elect Type...", L"Select Machine 2 Type");
+    
+    // Add it after Timeline menu
+    GetMenuBar()->Insert(3, machineMenu, L"&Machines");
+    
+    // Bind machine menu events
+    Bind(wxEVT_COMMAND_MENU_SELECTED, &MainFrame::OnMachine1Properties, this, ID_MACHINE1_PROPERTIES);
+    Bind(wxEVT_COMMAND_MENU_SELECTED, &MainFrame::OnMachine1Select, this, ID_MACHINE1_SELECT);
+    Bind(wxEVT_COMMAND_MENU_SELECTED, &MainFrame::OnMachine2Properties, this, ID_MACHINE2_PROPERTIES);
+    Bind(wxEVT_COMMAND_MENU_SELECTED, &MainFrame::OnMachine2Select, this, ID_MACHINE2_SELECT);
 }
 
 
@@ -99,6 +123,76 @@ void MainFrame::OnClose(wxCloseEvent& event)
 {
     mViewTimeline->Stop();
     Destroy();
+}
+
+/**
+ * Handler for Machine 1 Properties menu option
+ * @param event Menu event
+ */
+void MainFrame::OnMachine1Properties(wxCommandEvent& event)
+{
+    auto machine = mPicture->GetMachine1();
+    if (machine == nullptr)
+        return;
+        
+    MachinePropertiesDialog dlg(this, machine->GetStartFrame(), machine->GetScale());
+    if (dlg.ShowModal() == wxID_OK)
+    {
+        machine->SetStartFrame(dlg.GetStartFrame());
+        machine->SetScale(dlg.GetScale());
+        mViewEdit->Refresh();
+    }
+}
+
+/**
+ * Handler for Machine 1 Select menu option
+ * @param event Menu event
+ */
+void MainFrame::OnMachine1Select(wxCommandEvent& event)
+{
+    auto machine = mPicture->GetMachine1();
+    if (machine == nullptr)
+        return;
+        
+    if (machine->ShowDialog(this))
+    {
+        mViewEdit->Refresh();
+    }
+}
+
+/**
+ * Handler for Machine 2 Properties menu option
+ * @param event Menu event
+ */
+void MainFrame::OnMachine2Properties(wxCommandEvent& event)
+{
+    auto machine = mPicture->GetMachine2();
+    if (machine == nullptr)
+        return;
+        
+    MachinePropertiesDialog dlg(this, machine->GetStartFrame(), machine->GetScale());
+    if (dlg.ShowModal() == wxID_OK)
+    {
+        machine->SetStartFrame(dlg.GetStartFrame());
+        machine->SetScale(dlg.GetScale());
+        mViewEdit->Refresh();
+    }
+}
+
+/**
+ * Handler for Machine 2 Select menu option
+ * @param event Menu event
+ */
+void MainFrame::OnMachine2Select(wxCommandEvent& event)
+{
+    auto machine = mPicture->GetMachine2();
+    if (machine == nullptr)
+        return;
+        
+    if (machine->ShowDialog(this))
+    {
+        mViewEdit->Refresh();
+    }
 }
 
 

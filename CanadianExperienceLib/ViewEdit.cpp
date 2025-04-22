@@ -12,28 +12,41 @@
 #include "Picture.h"
 #include "Actor.h"
 #include "Drawable.h"
+#include "MachineAdapter.h"
+#include "MachinePropertiesDialog.h"
 
 /// A scaling factor, converts mouse motion to rotation in radians
 const double RotationScaling = 0.02;
 
 /**
  * Constructor
- * @param parent Pointer to wxFrame object, the main frame for the application
+ * @param parent Parent window for this window
  */
-ViewEdit::ViewEdit(wxFrame* parent) :wxScrolledCanvas(parent, wxID_ANY)
+ViewEdit::ViewEdit(wxFrame* parent) : 
+    wxScrolledCanvas(parent,
+                     wxID_ANY,
+                     wxDefaultPosition, 
+                     wxDefaultSize,
+                     wxHSCROLL | wxVSCROLL | wxBORDER_SUNKEN)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
 
     Bind(wxEVT_PAINT, &ViewEdit::OnPaint, this);
     Bind(wxEVT_LEFT_DOWN, &ViewEdit::OnLeftDown, this);
     Bind(wxEVT_LEFT_UP, &ViewEdit::OnLeftUp, this);
-    Bind(wxEVT_LEFT_DCLICK, &ViewEdit::OnLeftDoubleClick, this);
     Bind(wxEVT_MOTION, &ViewEdit::OnMouseMove, this);
+    Bind(wxEVT_LEFT_DCLICK, &ViewEdit::OnLeftDoubleClick, this);
 
-    parent->Bind(wxEVT_COMMAND_MENU_SELECTED, &ViewEdit::OnEditMove, this, XRCID("EditMove"));
-    parent->Bind(wxEVT_COMMAND_MENU_SELECTED, &ViewEdit::OnEditRotate, this, XRCID("EditRotate"));
-    parent->Bind(wxEVT_UPDATE_UI, &ViewEdit::OnUpdateEditMove, this, XRCID("EditMove"));
-    parent->Bind(wxEVT_UPDATE_UI, &ViewEdit::OnUpdateEditRotate, this, XRCID("EditRotate"));
+    parent->Bind(wxEVT_COMMAND_MENU_SELECTED, 
+        &ViewEdit::OnEditMove, this, XRCID("EditMove"));
+    parent->Bind(wxEVT_COMMAND_MENU_SELECTED, 
+        &ViewEdit::OnEditRotate, this, XRCID("EditRotate"));
+    parent->Bind(wxEVT_UPDATE_UI, 
+        &ViewEdit::OnUpdateEditMove, this, XRCID("EditMove"));
+    parent->Bind(wxEVT_UPDATE_UI, 
+        &ViewEdit::OnUpdateEditRotate, this, XRCID("EditRotate"));
+
+    mMode = Mode::Move;
 }
 
 /**
@@ -167,11 +180,48 @@ void ViewEdit::OnMouseMove(wxMouseEvent &event)
 }
 
 /**
- * Handle the left mouse button double-click event
- * @param event
+ * Handle a left double-click event
+ * @param event Mouse event
  */
-void ViewEdit::OnLeftDoubleClick(wxMouseEvent &event)
+void ViewEdit::OnLeftDoubleClick(wxMouseEvent& event)
 {
+    auto picture = GetPicture();
+    if (picture == nullptr)
+        return;
+    
+    // Convert mouse coordinates to view coordinates
+    auto point = CalcUnscrolledPosition(event.GetPosition());
+    
+    // Check if clicked on a machine
+    if (picture->GetMachine1()->HitTest(point))
+    {
+        // Create and display properties dialog for machine 1
+        MachinePropertiesDialog dlg(this, picture->GetMachine1()->GetStartFrame(), 
+                                   picture->GetMachine1()->GetScale());
+        if (dlg.ShowModal() == wxID_OK)
+        {
+            picture->GetMachine1()->SetStartFrame(dlg.GetStartFrame());
+            picture->GetMachine1()->SetScale(dlg.GetScale());
+            Refresh();
+        }
+        return;
+    }
+    else if (picture->GetMachine2()->HitTest(point))
+    {
+        // Create and display properties dialog for machine 2
+        MachinePropertiesDialog dlg(this, picture->GetMachine2()->GetStartFrame(), 
+                                   picture->GetMachine2()->GetScale());
+        if (dlg.ShowModal() == wxID_OK)
+        {
+            picture->GetMachine2()->SetStartFrame(dlg.GetStartFrame());
+            picture->GetMachine2()->SetScale(dlg.GetScale());
+            Refresh();
+        }
+        return;
+    }
+    
+    // Not a machine, pass to other handlers
+    event.Skip();
 }
 
 

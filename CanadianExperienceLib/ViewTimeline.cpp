@@ -13,6 +13,7 @@
 #include "TimelineDlg.h"
 #include "Picture.h"
 #include "Actor.h"
+#include "MachineAdapter.h"
 
 /// Y location for the top of a tick mark
 const int TickTop = 15;
@@ -274,6 +275,7 @@ void ViewTimeline::OnPlayPlay(wxCommandEvent& event)
     auto frameRate = timeline->GetFrameRate();
     auto time = timeline->GetCurrentTime();
 
+    mPlaying = true;
     mStopWatch.Start(lround(time * 1000));
     mTimer.Start(1000 / frameRate);
 }
@@ -289,12 +291,29 @@ void ViewTimeline::OnPlayPlayFromBeginning(wxCommandEvent& event)
         Stop();
     }
 
-    GetPicture()->SetAnimationTime(0);
+    // Reset the machines by setting their running state to false
+    auto picture = GetPicture();
+    if (picture != nullptr)
+    {
+        // Set animation time to 0 to reset everything
+        picture->SetAnimationTime(0);
+        
+        // Explicitly reset both machines to ensure they restart properly
+        if (picture->GetMachine1() != nullptr)
+        {
+            picture->GetMachine1()->SetFrame(0);
+        }
+        
+        if (picture->GetMachine2() != nullptr)
+        {
+            picture->GetMachine2()->SetFrame(0);
+        }
+    }
 
     auto timeline = GetPicture()->GetTimeline();
-
     auto frameRate = timeline->GetFrameRate();
 
+    mPlaying = true;
     mStopWatch.Start(0);
     mTimer.Start(1000 / frameRate);
 }

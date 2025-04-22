@@ -1,6 +1,6 @@
 /**
  * @file Source.h
- * @author Your Name
+ * @author Aditya Menon
  *
  * Class for a source component
  */

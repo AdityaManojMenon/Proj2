@@ -1,6 +1,6 @@
 /**
  * @file Pulley.h
- * @author Adi M
+ * @author Aditya Menon
  *
  * A pulley for the machine
  */

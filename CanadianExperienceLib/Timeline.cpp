@@ -133,7 +133,7 @@ void Timeline::Clear()
 {
     // Reset the current time and restore to defaults.
     mCurrentTime = 0;
-    mNumFrames = 300;
+    mNumFrames = 900;  // 30 seconds at 30fps
     mFrameRate = 30;
 
     for (auto channel : mChannels)

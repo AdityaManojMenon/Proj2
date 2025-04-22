@@ -1,11 +1,12 @@
 /**
  * @file Motor.cpp
- * @author Adi M
+ * @author Aditya Menon
  */
  
 #include "pch.h"
 #include "Motor.h"
 #include "Polygon.h"
+
 
 using namespace std;
 

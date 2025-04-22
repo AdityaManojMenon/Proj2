@@ -40,6 +40,6 @@ CMake Deprecation Warning at cmake-build-debug/_deps/googletest-src/googletest/C
 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
 -- Found Threads: TRUE
--- Configuring done (22.9s)
--- Generating done (0.2s)
+-- Configuring done (63.2s)
+-- Generating done (2.6s)
 -- Build files have been written to: /Users/am/Desktop/Proj2/cmake-build-debug

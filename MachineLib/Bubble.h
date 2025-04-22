@@ -1,6 +1,6 @@
 /**
  * @file Bubble.h
- * @author 
+ * @author Aditya Menon
  *
  * Class for a bubble
  */

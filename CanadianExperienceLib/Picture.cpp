@@ -8,32 +8,67 @@
 #include "Picture.h"
 #include "PictureObserver.h"
 #include "Actor.h"
+#include "MachineAdapter.h"
 
+using namespace std;
+
+/**
+ * Constructor with resource directory
+ * @param resourcesDir Directory that contains resources for this application
+ */
+Picture::Picture(const std::wstring& resourcesDir)
+{
+    // Create and add first machine
+    mMachine1 = std::make_shared<MachineAdapter>(resourcesDir, L"Machine 1");
+    mMachine1->SetPosition(wxPoint(400, 500));  // Moved more to the left
+    mMachine1->SetStartFrame(30);  // Starts at frame 30 (1 second at 30fps)
+
+    // Create and add second machine
+    mMachine2 = std::make_shared<MachineAdapter>(resourcesDir, L"Machine 2");
+    mMachine2->SetPosition(wxPoint(1100, 500));  // Moved further to the right
+    mMachine2->SetMachineNumber(2);  // Set it to a different machine type
+    mMachine2->SetStartFrame(90);  // Starts at frame 90 (3 seconds at 30fps)
+}
 
 /**
  * Constructor
-*/
+ */
 Picture::Picture()
 {
+    // Default constructor - machines will be created later
 }
 
-
 /**
- * Set the current animation time
+ * Set the animation time
  *
- * This forces the animation of all
- * objects to the current animation location.
- * @param time The new time.
+ * This sets the animation time for the picture, which
+ * is then passed to all actors.
+ *
+ * @param time The new animation time in seconds
  */
 void Picture::SetAnimationTime(double time)
 {
     mTimeline.SetCurrentTime(time);
-    UpdateObservers();
-
+    
     for (auto actor : mActors)
     {
         actor->GetKeyframe();
     }
+    
+    // Update machines with the current frame
+    int frame = (int)(time * 30);  // Assuming 30fps
+    
+    if (mMachine1 != nullptr)
+    {
+        mMachine1->SetFrame(frame);
+    }
+    
+    if (mMachine2 != nullptr)
+    {
+        mMachine2->SetFrame(frame);
+    }
+    
+    UpdateObservers();
 }
 
 /**
@@ -88,6 +123,17 @@ void Picture::Draw(std::shared_ptr<wxGraphicsContext> graphics)
     {
         actor->Draw(graphics);
     }
+    
+    // Draw the machines
+    if (mMachine1 != nullptr)
+    {
+        mMachine1->Draw(graphics);
+    }
+    
+    if (mMachine2 != nullptr)
+    {
+        mMachine2->Draw(graphics);
+    }
 }
 
 /**
@@ -100,59 +146,92 @@ void Picture::AddActor(std::shared_ptr<Actor> actor)
     actor->SetPicture(this);
 }
 
-
 /**
-* Save the picture animation to a file
-* @param filename File to save to.
-*/
-void Picture::Save(const wxString& filename)
+ * Save the picture animation to a file
+ * @param filename File to save to.
+ */
+void Picture::Save(const wxString &filename)
 {
-    wxXmlDocument xmlDoc;
+    wxXmlDocument document;
 
     auto root = new wxXmlNode(wxXML_ELEMENT_NODE, L"anim");
-    xmlDoc.SetRoot(root);
+    document.SetRoot(root);
+    
+    root->AddAttribute(L"title", L"Canadian Experience");
 
     // Save the timeline animation into the XML
     mTimeline.Save(root);
 
     //
-    // It is possible to add attributes to the root node here
+    // It is possible we would want to save other aspects
+    // of the program here.
     //
-    //root->AddAttribute(L"something", mSomething);
-
-    if(!xmlDoc.Save(filename, wxXML_NO_INDENTATION))
+    
+    // Save the machines
+    auto machinesNode = new wxXmlNode(wxXML_ELEMENT_NODE, L"machines");
+    root->AddChild(machinesNode);
+    
+    if (mMachine1 != nullptr)
     {
-        wxMessageBox(L"Write to XML failed");
-        return;
+        auto machine1Node = new wxXmlNode(wxXML_ELEMENT_NODE, L"machine");
+        machinesNode->AddChild(machine1Node);
+        mMachine1->XmlSave(machine1Node);
     }
+    
+    if (mMachine2 != nullptr)
+    {
+        auto machine2Node = new wxXmlNode(wxXML_ELEMENT_NODE, L"machine");
+        machinesNode->AddChild(machine2Node);
+        mMachine2->XmlSave(machine2Node);
+    }
+
+    document.Save(filename);
 }
-
-
 
 /**
-* Load a picture animation from a file
-* @param filename file to load from
-*/
-void Picture::Load(const wxString& filename)
+ * Load a picture animation from a file
+ * @param filename file to load from
+ */
+void Picture::Load(const wxString &filename)
 {
-    wxXmlDocument xmlDoc;
-    if(!xmlDoc.Load(filename))
-    {
-        wxMessageBox(L"Unable to load Animation file");
-        return;
-    }
+    wxXmlDocument document;
+    document.Load(filename);
 
-    // Get the XML document root node
-    auto root = xmlDoc.GetRoot();
-
-    // Load the animation from the XML
+    auto root = document.GetRoot();
+    
+    // Load the timeline animation from the XML
     mTimeline.Load(root);
-
-    //
-    // It is possible to load attributes from the root node here
-    //
-    // mSomething = root->GetAttribute(L"something", L"default");
-
-    SetAnimationTime(0);
-    UpdateObservers();
+    
+    // Load the machines if present
+    auto machinesNode = root->GetChildren();
+    while (machinesNode != nullptr)
+    {
+        if (machinesNode->GetName() == L"machines")
+        {
+            auto machineNode = machinesNode->GetChildren();
+            while (machineNode != nullptr)
+            {
+                if (machineNode->GetName() == L"machine")
+                {
+                    wxString name = machineNode->GetAttribute(L"name", L"");
+                    if (name == L"Machine 1" && mMachine1 != nullptr)
+                    {
+                        mMachine1->XmlLoad(machineNode);
+                    }
+                    else if (name == L"Machine 2" && mMachine2 != nullptr)
+                    {
+                        mMachine2->XmlLoad(machineNode);
+                    }
+                }
+                
+                machineNode = machineNode->GetNext();
+            }
+            
+            break;
+        }
+        
+        machinesNode = machinesNode->GetNext();
+    }
 }
+
+

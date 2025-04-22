@@ -19,15 +19,26 @@ const std::wstring ImagesDirectory = L"/images";
 
 
 /**
- * Factory method to create a new picture.
- * @param resourcesDir Directory that contains the resources for this application
+ * Constructor
+ */
+PictureFactory::PictureFactory()
+{
+}
+
+/**
+ * Create the picture.
+ * @param resourcesDir Directory that contains the images, audio, etc.
  * @return The created picture
  */
 std::shared_ptr<Picture> PictureFactory::Create(std::wstring resourcesDir)
 {
+    // Store the resources directory for future use
+    mResourcesDir = resourcesDir;
+    
     auto imagesDir = resourcesDir + ImagesDirectory;
 
-    auto picture = std::make_shared<Picture>();
+    // Create a picture that will contain the animation
+    auto picture = std::make_shared<Picture>(resourcesDir);
 
     // Create the background and add it
     auto background = std::make_shared<Actor>(L"Background");

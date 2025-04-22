@@ -1,6 +1,6 @@
 /**
  * @file BubbleBlower.h
- * @author 
+ * @author Aditya Menon
  *
  * Class for a bubble blower
  */

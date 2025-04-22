@@ -1,6 +1,6 @@
 /**
  * @file Sink.h
- * @author Your Name
+ * @author Aditya Menon
  *
  * Class for a sink component
  */

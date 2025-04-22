@@ -12,6 +12,7 @@
 
 class PictureObserver;
 class Actor;
+class MachineAdapter; // Forward declaration for MachineAdapter
 
 /**
  *  Class that represents our animation picture
@@ -30,9 +31,24 @@ private:
 
     /// The animation timeline
     Timeline mTimeline;
+    
+    /// First machine in the picture
+    std::shared_ptr<MachineAdapter> mMachine1;
+    
+    /// Second machine in the picture
+    std::shared_ptr<MachineAdapter> mMachine2;
 
 public:
+    /**
+     * Constructor
+     */
     Picture();
+
+    /**
+     * Constructor
+     * @param resourcesDir The resources directory
+     */
+    Picture(const std::wstring& resourcesDir);
 
     /// Copy Constructor (Disabled)
     Picture(const Picture &) = delete;
@@ -129,5 +145,17 @@ public:
     void Load(const wxString& filename);
 
     void Save(const wxString& filename);
+    
+    /**
+     * Get the first machine
+     * @return Pointer to first machine
+     */
+    std::shared_ptr<MachineAdapter> GetMachine1() { return mMachine1; }
+    
+    /**
+     * Get the second machine
+     * @return Pointer to second machine
+     */
+    std::shared_ptr<MachineAdapter> GetMachine2() { return mMachine2; }
 };
 

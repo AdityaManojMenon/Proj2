@@ -1,6 +1,6 @@
 /**
  * @file Bubble.cpp
- * @author 
+ * @author Aditya Menon
  */
 
 #include "pch.h"
@@ -16,7 +16,7 @@ Bubble::Bubble()
     mImage = std::make_shared<cse335::Polygon>();
     
     // Use fixed size for all bubbles instead of random sizing
-    double radius = 20.0;  // Fixed bubble size
+    double radius = 15.0;  // Fixed bubble size
     mImage->Circle(radius);
     
     // Set a semi-transparent light blue color

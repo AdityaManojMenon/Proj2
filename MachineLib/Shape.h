@@ -1,6 +1,6 @@
 /**
  * @file Shape.h
- * @author Adi M
+ * @author Aditya Menon
  *
  * Class for shapes in the machine system
  */

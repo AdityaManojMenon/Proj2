@@ -11,11 +11,27 @@
 class Picture;
 
 /**
- * A factory class that builds our picture.
+ * Factory class that creates the picture and adds all to it.
  */
-class PictureFactory {
+class PictureFactory
+{
 public:
-    std::shared_ptr<Picture> Create(std::wstring resourcesDir);
+    /**
+     * Constructor
+    */
+    PictureFactory();
+
+    std::shared_ptr<Picture> Create(std::wstring imagesDir);
+    
+    /**
+     * Get the last used resources directory
+     * @return Resources directory path
+     */
+    std::wstring GetResourcesDir() const { return mResourcesDir; }
+
+private:
+    /// The resources directory
+    std::wstring mResourcesDir;
 };
 
 #endif //CANADIANEXPERIENCE_PICTUREFACTORY_H
