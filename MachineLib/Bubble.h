@@ -9,6 +9,7 @@
 #define BUBBLE_H
 
 #include <memory>
+#include <random>
 
 namespace cse335 {
     class Polygon;
@@ -28,7 +29,28 @@ private:
     /// The position of the bubble
     wxPoint2DDouble mPosition;
     
+    /// The current radius of the bubble
+    double mCurrentRadius;
+    
+    /// Flag to indicate if the bubble has popped
+    bool mPopped = false;
+    
+    /// Random number generator
+    std::mt19937 mRandom;
+
 public:
+    /// Probability of a bubble expanding
+    static const double BubbleExpansionProbability;
+    
+    /// The maximum possible radius of a bubble, after which it pops
+    static const int BubbleMaximumRadius;
+    
+    /// The initial radius of a new bubble
+    static const int BubbleInitialRadius;
+    
+    /// The amount the radius increases on expansion
+    static const double BubbleExpansionAmount;
+
     Bubble();
     
     /**
@@ -74,10 +96,16 @@ public:
     std::shared_ptr<cse335::Polygon> GetImage() { return mImage; }
     
     /**
-     * Update the bubble position
+     * Update the bubble position and size
      * @param elapsed Elapsed time in seconds
      */
     void Update(double elapsed);
+    
+    /**
+     * Check if the bubble has popped
+     * @return True if the bubble has popped
+     */
+    bool HasPopped() const { return mPopped; }
 };
 
 #endif //BUBBLE_H 

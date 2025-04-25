@@ -8,19 +8,32 @@
 #include "Polygon.h"
 
 /// Gravity is very mild for soap bubbles (slower falling)
-const float Gravity = 2.0;
+const float Gravity = 1.0;
+
+// Initialize static constants
+const double Bubble::BubbleExpansionProbability = 0.05;
+const int Bubble::BubbleMaximumRadius = 30;
+const int Bubble::BubbleInitialRadius = 15; // Starting radius
+const double Bubble::BubbleExpansionAmount = 0.5; // How much radius increases each time
 
 /**
  * Constructor
  */
 Bubble::Bubble()
 {
-    // Create the bubble image
+    // Seed the random number generator
+    std::random_device rd;
+    mRandom.seed(rd());
+
+    // Create the bubble image polygon
     mImage = std::make_shared<cse335::Polygon>();
     
-    // Use fixed size for all bubbles instead of random sizing
-    double radius = 15.0;  // Fixed bubble size
-    mImage->Circle(radius);
+    // Initialize radius
+    mCurrentRadius = BubbleInitialRadius;
+    
+    // Create the circle based on initial radius
+    // Note: The actual drawing will scale this base circle
+    mImage->Circle(BubbleInitialRadius);
     
     // Set a semi-transparent light blue color
     mImage->SetColor(wxColor(100, 200, 255, 180));  // Light blue with transparency
@@ -62,19 +75,36 @@ void Bubble::Draw(std::shared_ptr<wxGraphicsContext> graphics)
 {
     if (mImage != nullptr)
     {
-        // Draw the bubble
-        mImage->DrawPolygon(graphics, mPosition.m_x, mPosition.m_y);
+        // Calculate scale factor based on current radius vs initial radius
+        double scale = mCurrentRadius / BubbleInitialRadius;
+        
+        // Save the current graphics state
+        graphics->PushState();
+        
+        // Translate to the bubble's position
+        graphics->Translate(mPosition.m_x, mPosition.m_y);
+        
+        // Scale the graphics context
+        graphics->Scale(scale, scale);
+        
+        // Draw the polygon (at the origin, scaled)
+        mImage->DrawPolygon(graphics, 0, 0);
+        
+        // Restore the graphics state
+        graphics->PopState();
     }
 }
 
 /**
- * Update the bubble position
+ * Update the bubble position and size
  * @param elapsed_time Time elapsed since last update
  */
 void Bubble::Update(double elapsed_time)
 {
+    if (mPopped) return; // Do nothing if already popped
+
     // Use a larger time step for faster movement
-    const double fixedTimeStep = 0.033;
+    const double fixedTimeStep = 0.033;  // ~30fps equivalent - makes bubbles move faster
     
     // Apply mild gravity to the velocity
     mVelocity.m_y += Gravity * fixedTimeStep;
@@ -82,4 +112,17 @@ void Bubble::Update(double elapsed_time)
     // Apply velocity to position with fixed time step
     mPosition.m_x += mVelocity.m_x * fixedTimeStep;
     mPosition.m_y += mVelocity.m_y * fixedTimeStep;
+    
+    // Expansion logic
+    std::uniform_real_distribution<> distribution(0.0, 1.0);
+    if (distribution(mRandom) < BubbleExpansionProbability)
+    {
+        mCurrentRadius += BubbleExpansionAmount;
+        
+        // Check if bubble popped
+        if (mCurrentRadius > BubbleMaximumRadius)
+        {
+            mPopped = true;
+        }
+    }
 } 

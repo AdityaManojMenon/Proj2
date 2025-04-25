@@ -10,7 +10,7 @@
 #include "Pulley.h"
 #include "Shape.h"
 #include "BubbleBlower.h"
-#include "FlappingBelt.h"  // Include the new FlappingBelt header
+#include "FlappingBelt.h"  
 
 using namespace std;
 

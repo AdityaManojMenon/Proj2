@@ -84,8 +84,7 @@ void BubbleBlower::Update(double time)
     // Create new bubbles
     BlowBubbles(time);
     
-    // Remove bubbles that have gone far off-screen
-    // Use much larger boundaries to ensure bubbles completely exit the view
+    // Remove bubbles that have gone far off-screen or popped
     auto iter = mBubbles.begin();
     while (iter != mBubbles.end())
     {
@@ -93,11 +92,21 @@ void BubbleBlower::Update(double time)
         bubble->Update(time);
         
         auto pos = bubble->GetPosition();
+        bool shouldRemove = false;
         
+        // Check if bubble is popped
+        if (bubble->HasPopped())
+        {
+            shouldRemove = true;
+        }
         // Only remove bubbles when they are very far off screen
-        // This prevents bubbles from appearing to "pop" at the edges
-        if (pos.m_y > 600 || pos.m_y < -600 || 
+        else if (pos.m_y > 600 || pos.m_y < -600 || 
             pos.m_x > 800 || pos.m_x < -800)
+        {
+            shouldRemove = true;
+        }
+        
+        if (shouldRemove)
         {
             iter = mBubbles.erase(iter);
         }
