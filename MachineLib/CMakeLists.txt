@@ -22,6 +22,7 @@ set(SOURCE_FILES
         Bubble.cpp Bubble.h
         BubbleBlower.cpp BubbleBlower.h
         Const.cpp Const.h
+        FlappingBelt.cpp FlappingBelt.h
 )
 
 

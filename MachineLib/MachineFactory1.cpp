@@ -130,7 +130,7 @@ std::shared_ptr<Machine> MachineFactory1::Create()
     double p2y2 = y2 + r2 * sin(beta2);
     
     // Calculate belt width vectors perpendicular to the belt line
-    double belt_width = 6.0; // wider belt for better appearance
+    double belt_width = 3.0;
     double dx1 = p2x1 - p1x1;
     double dy1 = p2y1 - p1y1;
     double len1 = sqrt(dx1*dx1 + dy1*dy1);
@@ -310,8 +310,8 @@ std::shared_ptr<Machine> MachineFactory1::Create()
     connected_small_pulley_1->SetImage(mImagesDir + L"/pulley2.png");
     connected_small_pulley_1->SetPosition(RightPostX, TopPulleyY);
     connected_small_pulley_1->SetPhase(0.25); // Quarter rotation offset
-    // Make the pulley with the flag rotate faster (full speed of source pulley)
-    connected_small_pulley_1->SetSpeedMultiplier(1.0);
+    // Make the pulley with the flag rotate faster (1.3x speed of source pulley)
+    connected_small_pulley_1->SetSpeedMultiplier(1.3);
 
     //
     // Small connected pulley 2 (on center of pulley3)
@@ -359,7 +359,7 @@ std::shared_ptr<Machine> MachineFactory1::Create()
     auto bubbleBlower = std::make_shared<BubbleBlower>();
     // Position and tilt bubbleBlower
     bubbleBlower->SetPosition(50, -335);
-    bubbleBlower->SetCurrentRotation(-0.25);  // Changed from SetRotation to SetCurrentRotation
+    bubbleBlower->SetCurrentRotation(-0.3);  // More tilt to the left
     // Set image directory for the bubble blower to find bubble.png
     bubbleBlower->SetImageDirectory(mImagesDir);
 

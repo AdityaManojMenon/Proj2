@@ -37,7 +37,7 @@ BubbleBlower::BubbleBlower()
     mRandom.seed(rd());     // Seed the random number generator
     
     // Tilt the bubble blower slightly to the left (negative rotation)
-    SetCurrentRotation(-0.12);  // About -43 degrees (increased from -0.07/-25 degrees)
+    SetCurrentRotation(-0.3);  // About -17 degrees - more tilt to the left
 }
 
 /**
@@ -116,17 +116,15 @@ void BubbleBlower::SetTime(double time)
 {
     Component::SetTime(time);
     
-    // Only update if time is positive (after start button is clicked)
+    // Only create bubbles when time is positive (after start button is clicked)
     if (time > 0)
     {
         // Update the component at this time step
         Update(time);
     }
-    else
-    {
-        // Reset previous rotation when time is reset
-        mPreviousRotation = GetCurrentRotation();
-    }
+    
+    // Store previous rotation for next update
+    mPreviousRotation = GetCurrentRotation();
 }
 
 /**
@@ -147,13 +145,17 @@ void BubbleBlower::CreateBubble()
     auto dy1 = -cos(angle1);
 
     double offset = BubbleBlowerOffset + Random(-BubbleBlowerOffsetVariance, BubbleBlowerOffsetVariance);
+    
+    // Use full velocity for faster movement
     double velocity = Random(BubbleMinimumVelocity, BubbleMaximumVelocity);
 
     // Add a left offset of 35 pixels to move bubble creation position leftward
     wxPoint2DDouble bubblePosition(
-        (float)(GetX() + dx * offset - 35),  // Increased from -20 to -35 pixels
+        (float)(GetX() + dx * offset - 35),
         (float)(GetY() + dy * offset)
     );
+    
+    // Faster initial velocity for quicker movement
     wxPoint2DDouble bubbleVelocity((float)(dx1 * velocity), (float)(dy1 * velocity));
     
     // Create a new bubble
@@ -193,18 +195,34 @@ void BubbleBlower::BlowBubbles(double time)
     {
         rotation = 0;
     }
+
+    // Amplify rotation to compensate for possible slow rotation from motor
+    rotation *= 3.0;  // Triple the rotation value for better bubble creation rate
+
+    // Keep track of accumulated rotation to handle small movements
+    static double accumulatedRotation = 0;
+    accumulatedRotation += rotation;
+
+    // Compute bubbles to generate
+    // Each bubble should be created after 1/5 of a rotation
+    const double rotationPerBubble = 1.0 / BubblePerRotation;
     
-    // Compute how many bubbles to generate for this amount of rotation
-    // First calculate using the specification formula
-    auto baseNum = int(rotation * (BubblePerRotation + Random(-BubbleVariancePerSecond/2, BubbleVariancePerSecond)));
+    // Calculate how many bubbles to create based on accumulated rotation
+    int num = 0;
     
-    // Increase bubble count by 30%
-    auto num = int(baseNum * 1.3);
-    
-    // Ensure at least one bubble is created if there is meaningful rotation
-    if (rotation > 0.02 && num < 1)
+    if (accumulatedRotation >= rotationPerBubble)
     {
-        num = 1;
+        // Calculate number of bubbles to create - exactly 5 per rotation
+        num = int(accumulatedRotation * BubblePerRotation);
+        
+        // Cap the maximum number of bubbles created at once to prevent bursts
+        if (num > 3)
+        {
+            num = 3;
+        }
+        
+        // Subtract the used rotation amount, but keep remainders for next time
+        accumulatedRotation -= (num / BubblePerRotation);
     }
     
     // Create the bubbles

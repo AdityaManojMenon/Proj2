@@ -7,6 +7,9 @@
 #include "Bubble.h"
 #include "Polygon.h"
 
+/// Gravity is very mild for soap bubbles (slower falling)
+const float Gravity = 2.0;
+
 /**
  * Constructor
  */
@@ -70,9 +73,11 @@ void Bubble::Draw(std::shared_ptr<wxGraphicsContext> graphics)
  */
 void Bubble::Update(double elapsed_time)
 {
-    // Use a fixed time step to ensure consistent movement speed
-    // regardless of actual elapsed time
-    const double fixedTimeStep = 0.016;  // ~60fps equivalent
+    // Use a larger time step for faster movement
+    const double fixedTimeStep = 0.033;
+    
+    // Apply mild gravity to the velocity
+    mVelocity.m_y += Gravity * fixedTimeStep;
     
     // Apply velocity to position with fixed time step
     mPosition.m_x += mVelocity.m_x * fixedTimeStep;
